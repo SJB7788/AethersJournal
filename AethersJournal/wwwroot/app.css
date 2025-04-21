@@ -45,7 +45,7 @@ a,
 }
 
 .content {
-  padding-top: 1.1rem;
+  padding: 2.5em 3em !important;
 }
 
 h1:focus {
