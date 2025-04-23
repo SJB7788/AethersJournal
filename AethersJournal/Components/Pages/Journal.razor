@@ -3,29 +3,31 @@
 
 <PageTitle>Journal</PageTitle>
 
-<div class="journal-header">
-    <div class="header-title">
-        <div class="title-date">
-            <h1 class="date">Sunday, April 20 2025</h1>
-            <span class="dropdown"></span>
+<div class="main-journal-container">
+    <div class="journal-header">
+        <div class="header-title">
+            <div class="title-date">
+                <h1 class="date">Sunday, April 20 2025</h1>
+                <span class="dropdown"></span>
+            </div>
+            <div class="title-controller">
+                <button class="save" onclick="sendPostRequest()">
+                    Save Journal
+                </button>
+            </div>
         </div>
-        <div class="title-controller">
-            <button class="save" onclick="sendPostRequest()">
-                Save Journal
-            </button>
+        <div class="header-controller">
+            <a class="navigation" id="navigation-prev" onclick="Previous()">
+                &lt Previous
+            </a>
+            <a class="navigation" id="navigation-next" onclick="Next()">
+                Next &gt </a>
         </div>
     </div>
-    <div class="header-controller">
-        <a class="navigation" id="navigation-prev" onclick="Previous()">
-            &lt Previous
-        </a>
-        <a class="navigation" id="navigation-next" onclick="Next()">
-            Next &gt </a>
+
+    <div class="journal-contents">
+        <TextEditor />
     </div>
-</div>
-
-<div class="journal-contents">
-
 </div>
 
 

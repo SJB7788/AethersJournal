@@ -3,6 +3,15 @@
     flex-direction: column;
 } */
 
+.main-journal-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  gap: 1.5em;
+  overflow: hidden;
+}
+
 .header-title {
   display: flex;
   flex-direction: row;
@@ -70,4 +79,10 @@
 
 #navigation-next {
   margin-left: 2.5em;
+}
+
+.journal-contents {
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
 }

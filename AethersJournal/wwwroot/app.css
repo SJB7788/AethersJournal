@@ -46,6 +46,7 @@ a,
 
 .content {
   padding: 2.5em 3em !important;
+  height: 100vh;
 }
 
 h1:focus {
