@@ -1,0 +1,100 @@
+#chatbox-button {
+  position: absolute;
+  bottom: -10px;
+  right: -10px;
+  width: 57px;
+  height: 57px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--title-color);
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 100ms ease-in;
+  z-index: 3;
+}
+
+.button {
+  width: 30px;
+  height: 30px;
+  background-repeat: no-repeat;
+  background-image: url('data:image/svg+xml,<svg id="chatbox-icon" xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px" fill="%23fff"><path d="M880-80 720-240H320q-33 0-56.5-23.5T240-320v-40h440q33 0 56.5-23.5T760-440v-280h40q33 0 56.5 23.5T880-640v560ZM160-473l47-47h393v-280H160v327ZM80-280v-520q0-33 23.5-56.5T160-880h440q33 0 56.5 23.5T680-800v280q0 33-23.5 56.5T600-440H240L80-280Zm80-240v-280 280Z" /></svg>');
+}
+
+#chatbox-body {
+  position: absolute;
+  bottom: -20px;
+  right: -20px;
+  display: flex;
+  width: 370px;
+  height: 500px;
+  padding: 20px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: var(--chatbox-bg-color);
+  border-radius: 15px;
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+}
+
+#chatbox-content {
+  width: 100%;
+  height: calc(90%);
+  overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.ai-message,
+.user-message {
+  font-family: var(--desc-font-family);
+  font-size: 0.85em;
+  border-radius: 15px;
+  padding: 10px;
+  margin: 5px 0;
+  max-width: 70%;
+  word-wrap: break-word;
+}
+
+.ai-message {
+  color: var(--chatbox-ai-message-text-color);
+  background-color: var(--chatbox-ai-message-bg-color);
+  align-self: flex-start;
+}
+
+.user-message {
+  color: var(--chatbox-user-message-text-color);
+  background-color: var(--chatbox-user-message-bg-color);
+  align-self: flex-end;
+}
+
+#chatbox-input-container {
+  width: 82%;
+  height: calc(10% - 10px);
+  display: flex;
+  flex-direction: row;
+  gap: 7px;
+}
+
+#chatbox-input {
+  font-family: var(--desc-font-family);
+  font-size: 0.8em;
+  border-radius: 15px;
+  border: none;
+  flex: 1;
+  height: 100%;
+  outline: none;
+  padding: 5px 12px;
+  box-sizing: border-box;
+}
+
+#chatbox-send {
+  width: 35px;
+  height: 35px;
+  background-image: url('data:image/svg+xml,<svg id="chatbox-send-icon" xmlns="http://www.w3.org/2000/svg" height="35px" viewBox="0 -960 960 960" width="35px" fill="%23f7f6f2"><path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z" /></svg>');
+  cursor: pointer;
+}
