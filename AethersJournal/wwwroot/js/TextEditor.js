@@ -26,15 +26,16 @@ window.TextEditor = {
     const span = document.createElement("span");
 
     if (element.nodeType === 1) {
-      if (
-        (element.tagName.toLowerCase() === "span") &
-        (element.style.fontWeight === "bold")
-      ) {
-        console.log("he");
+      if (element.tagName.toLowerCase() === "span" & element.style.fontWeight === "bold") {
+        console.log("he")
         span.textContent = element.textContent;
+        element.remove();
+        this.currSelection.insertNode(span);
+        return;
       }
     } else {
-      span.style.fontWeight = "bold";
+      
+    span.style.fontWeight = "bold";
     }
 
     element.remove();
