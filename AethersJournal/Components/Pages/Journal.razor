@@ -1,4 +1,6 @@
 ﻿@page "/journal"
+@inject NavigationManager NavManager
+@inject JournalService JournalService
 @rendermode InteractiveServer
 
 <PageTitle>Journal</PageTitle>
@@ -26,12 +28,43 @@
     </div>
 
     <div class="journal-contents">
-        <TextEditor />
+        <TextEditor @bind-Content="content"/>
         <Chatbox />
     </div>
 </div>
 
 
 @code {
+    private DateTime selectedDate;
+    private string? content;
 
+    protected override async Task OnInitializedAsync()
+    {
+        this.selectedDate = GetQueryDate();
+        JournalEntry? entry = await JournalService.GetEntryForUser(1, this.selectedDate);
+
+        if (entry != null) {
+            this.content = entry.Content;
+        } else {
+            this.content = "";
+        }
+    }
+
+    private DateTime GetQueryDate() {
+        Uri uri = NavManager.ToAbsoluteUri(NavManager.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+        DateTime date;
+
+        if (query.TryGetValue("date", out var dateString) &&
+        DateTime.TryParse(dateString, out var parsedDate))
+        {
+            date = parsedDate.Date;
+        }
+        else
+        {
+            date = DateTime.UtcNow.Date;
+        }
+        
+        return date;
+    }
 }
