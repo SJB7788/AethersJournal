@@ -1,6 +1,7 @@
 window.TextEditor = {
   currSelection: null,
 
+  // Selection related functions
   saveSelection: function (event) {
     const sel = window.getSelection();
     if (sel.rangeCount > 0) {
@@ -76,6 +77,17 @@ window.TextEditor = {
       range.setStartAfter(node);
       range.collapse(true);
     });
+  },
+
+  // For cooperation with C#
+  // Insert Content
+  insertContent: function (element, journalContent) {
+    element.innerHTML += journalContent;
+  },
+
+  // Extract Content
+  getContent: function (element) {
+    return element.innerHTML;
   },
 };
 

@@ -8,7 +8,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<JournalContext>(options =>
     options.UseNpgsql(connectionString));
     
-builder.Services.AddSingleton<JournalService>();
+builder.Services.AddScoped<JournalService>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

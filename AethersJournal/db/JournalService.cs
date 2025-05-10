@@ -25,10 +25,9 @@ public class JournalService
         );
     }
 
-    public async Task SaveOrUpdateJournal(int userId, string journalEntry)
+    public async Task SaveOrUpdateJournal(int userId, string journalEntry, DateTime dateTime)
     {
-        DateTime today = DateTime.UtcNow.Date;
-        JournalEntry? entry = await _context.JournalEntries.FirstOrDefaultAsync(j => j.UserId == userId && j.Date.Date == today);
+        JournalEntry? entry = await _context.JournalEntries.FirstOrDefaultAsync(j => j.UserId == userId && j.Date.Date == dateTime);
 
         if (entry != null)
         {
@@ -40,7 +39,7 @@ public class JournalService
             JournalEntry newEntry = new()
             {
                 UserId = userId,
-                Date = today,
+                Date = dateTime,
                 Content = journalEntry
             };
 

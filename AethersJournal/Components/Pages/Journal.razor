@@ -13,13 +13,14 @@
                 <span class="dropdown"></span>
             </div>
             <div class="title-controller">
-                <button class="save" onclick="sendPostRequest()">
+                <button class="save" @onclick="SaveJournal">
                     Save Journal
                 </button>
+                <p>Saving...</p>
             </div>
         </div>
         <div class="header-controller">
-            <a class="navigation" id="navigation-prev" onclick="Previous()">
+            <a class="navigation" id="navigation-prev" @onclick="Previous">
                 &lt Previous
             </a>
             <a class="navigation" id="navigation-next" onclick="Next()">
@@ -28,7 +29,7 @@
     </div>
 
     <div class="journal-contents">
-        <TextEditor @bind-Content="content"/>
+        <TextEditor @bind-Content="journalContent"/>
         <Chatbox />
     </div>
 </div>
@@ -36,7 +37,7 @@
 
 @code {
     private DateTime selectedDate;
-    private string? content;
+    private string journalContent = String.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -44,27 +45,36 @@
         JournalEntry? entry = await JournalService.GetEntryForUser(1, this.selectedDate);
 
         if (entry != null) {
-            this.content = entry.Content;
+            this.journalContent = entry.Content;
         } else {
-            this.content = "";
+            this.journalContent = "";
         }
     }
 
     private DateTime GetQueryDate() {
         Uri uri = NavManager.ToAbsoluteUri(NavManager.Uri);
         var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
         DateTime date;
 
         if (query.TryGetValue("date", out var dateString) &&
         DateTime.TryParse(dateString, out var parsedDate))
         {
-            date = parsedDate.Date;
+            date = DateTime.SpecifyKind(parsedDate.Date, DateTimeKind.Utc);
         }
         else
         {
             date = DateTime.UtcNow.Date;
         }
-        
+    
         return date;
+    }
+
+    public void Previous() {
+        Console.WriteLine("Prev");
+    }
+
+    protected async Task SaveJournal() {
+        await JournalService.SaveOrUpdateJournal(1, this.journalContent, this.selectedDate);
     }
 }

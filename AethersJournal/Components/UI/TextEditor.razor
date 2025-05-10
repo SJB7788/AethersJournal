@@ -24,11 +24,39 @@
         </div>
     </div>
 
-    <div contenteditable="true" id="main-text-content" placeholder="Description" onpaste="TextEditor.handlePaste(event)"
-        onmouseup="TextEditor.saveSelection()" onkeyup="TextEditor.saveSelection()"
-        onclick="TextEditor.saveSelection()">
+    <div @ref="EditorDiv" @oninput="HandleInput" contenteditable="true" id="main-text-content" placeholder="Description"
+        onpaste="TextEditor.handlePaste(event)" onmouseup="TextEditor.saveSelection()"
+        onkeyup="TextEditor.saveSelection()" onclick="TextEditor.saveSelection()">
     </div>
 </div>
 
 @code {
+    [Parameter]
+    public string Content { get; set; } = String.Empty;
+
+    [Parameter]
+    public EventCallback<string> ContentChanged { get; set; }
+    private ElementReference EditorDiv;
+
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !string.IsNullOrWhiteSpace(Content))
+        {
+            await InsertEntryAsync(Content);
+        }
+    }
+
+    private async Task HandleInput()
+    {
+        var value = await JS.InvokeAsync<string>("TextEditor.getContent", EditorDiv);
+        Content = value;
+        await ContentChanged.InvokeAsync(Content);
+    }
+
+    private async Task InsertEntryAsync(string Content)
+    {
+        await JS.InvokeVoidAsync("TextEditor.insertContent", EditorDiv, Content);
+    }
 }
