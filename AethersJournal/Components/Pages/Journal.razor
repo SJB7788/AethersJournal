@@ -23,13 +23,13 @@
             <a class="navigation" id="navigation-prev" @onclick="Previous">
                 &lt Previous
             </a>
-            <a class="navigation" id="navigation-next" onclick="Next()">
+            <a class="navigation" id="navigation-next" @onclick="Next">
                 Next &gt </a>
         </div>
     </div>
 
     <div class="journal-contents">
-        <TextEditor @bind-Content="journalContent"/>
+        <TextEditor @bind-Content="journalContent" @key="selectedDate"/>
         <Chatbox />
     </div>
 </div>
@@ -39,16 +39,16 @@
     private DateTime selectedDate;
     private string journalContent = String.Empty;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
         this.selectedDate = GetQueryDate();
         JournalEntry? entry = await JournalService.GetEntryForUser(1, this.selectedDate);
-
         if (entry != null) {
             this.journalContent = entry.Content;
         } else {
             this.journalContent = "";
         }
+        Console.WriteLine("Journal Entry: " + journalContent);
     }
 
     private DateTime GetQueryDate() {
@@ -61,6 +61,11 @@
         DateTime.TryParse(dateString, out var parsedDate))
         {
             date = DateTime.SpecifyKind(parsedDate.Date, DateTimeKind.Utc);
+            // check if the date is ahead of current date
+            if (date > DateTime.UtcNow.Date) {
+                date = DateTime.UtcNow.Date;
+                NavManager.NavigateTo("/journal");
+            }
         }
         else
         {
@@ -70,8 +75,21 @@
         return date;
     }
 
-    public void Previous() {
-        Console.WriteLine("Prev");
+    protected void Previous() {
+        this.selectedDate = this.selectedDate.AddDays(-1);
+        string formattedDate = this.selectedDate.ToString("yyy-MM-dd");
+
+        NavManager.NavigateTo($"/journal?date={formattedDate}");
+        // Temporary Solution to TextEditor not rerendering
+        NavManager.Refresh(true);
+    }
+
+    protected void Next() {
+        this.selectedDate = this.selectedDate.AddDays(1);
+        string formattedDate = this.selectedDate.ToString("yyy-MM-dd");
+
+        NavManager.NavigateTo($"/journal?date={formattedDate}");
+        NavManager.Refresh(true);
     }
 
     protected async Task SaveJournal() {

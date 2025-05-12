@@ -24,7 +24,7 @@
         </div>
     </div>
 
-    <div @ref="EditorDiv" @oninput="HandleInput" contenteditable="true" id="main-text-content" placeholder="Description"
+    <div @ref="EditorDiv" @oninput="HandleInput" contenteditable="true" id="main-text-content"
         onpaste="TextEditor.handlePaste(event)" onmouseup="TextEditor.saveSelection()"
         onkeyup="TextEditor.saveSelection()" onclick="TextEditor.saveSelection()">
     </div>
@@ -36,27 +36,47 @@
 
     [Parameter]
     public EventCallback<string> ContentChanged { get; set; }
+    private string _lastRenderContent = String.Empty;
+    private bool _contentUpdated = false;
     private ElementReference EditorDiv;
 
     [Inject] private IJSRuntime JS { get; set; } = default!;
 
-    protected async override Task OnAfterRenderAsync(bool firstRender)
+    // Rerender does not seem to work
+    // Temporary fix is in Journal.Razor where we hard refresh everytime we go Prev or Next
+    protected override void OnParametersSet()
     {
-        if (firstRender && !string.IsNullOrWhiteSpace(Content))
+        if (_lastRenderContent != Content)
         {
-            await InsertEntryAsync(Content);
+            _lastRenderContent = Content;
+            _contentUpdated = true;
+            StateHasChanged();
+        }
+    }
+
+    // Rerender does not seem to work
+    // Temporary fix is in Journal.Razor where we hard refresh everytime we go Prev or Next
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender || _contentUpdated)
+        {
+            await JS.InvokeVoidAsync("TextEditor.setContent", EditorDiv, Content);
+            _contentUpdated = false;
         }
     }
 
     private async Task HandleInput()
     {
         var value = await JS.InvokeAsync<string>("TextEditor.getContent", EditorDiv);
+
+        _lastRenderContent = value;
         Content = value;
+
         await ContentChanged.InvokeAsync(Content);
     }
 
     private async Task InsertEntryAsync(string Content)
     {
-        await JS.InvokeVoidAsync("TextEditor.insertContent", EditorDiv, Content);
+        await JS.InvokeVoidAsync("TextEditor.setContent", EditorDiv, Content);
     }
 }

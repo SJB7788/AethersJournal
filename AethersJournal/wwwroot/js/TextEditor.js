@@ -81,8 +81,8 @@ window.TextEditor = {
 
   // For cooperation with C#
   // Insert Content
-  insertContent: function (element, journalContent) {
-    element.innerHTML += journalContent;
+  setContent: function (element, journalContent) {
+    element.innerHTML = journalContent;
   },
 
   // Extract Content
