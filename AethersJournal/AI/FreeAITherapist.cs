@@ -1,8 +1,10 @@
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 
-class FreeAITherapist : IAITherapist
+class FreeAITherapist
 {
+    private string _apiKey;
     private HttpClient _httpClient;
     private ChatLog[] _chatLogs;
     private string _basePrompt = """
@@ -11,8 +13,9 @@ class FreeAITherapist : IAITherapist
     """;
     private StringBuilder _stringBuilder;
 
-    public FreeAITherapist(HttpClient httpClient)
+    public FreeAITherapist(IConfiguration config, HttpClient httpClient)
     {
+        _apiKey = config["GeminiAPIKey"]!;
         _httpClient = httpClient;
         _chatLogs = [];
 
@@ -32,14 +35,39 @@ class FreeAITherapist : IAITherapist
 
         _stringBuilder.AppendLine(new ChatLog(ChatProfile.User, input).ToString());
 
-        using StringContent jsonPrompt = new(
-            JsonSerializer.Serialize(new
+        var requestBody = new
+        {
+            contents = new[]
             {
-                contents = ""
+                new
+                {
+                    parts = new[]
+                    {
+                        new { text = input }
+                    }
+                }
+            }
+        };
 
-            })
-        );
+        string json = JsonSerializer.Serialize(requestBody);
+        StringContent content = new(json, Encoding.UTF8, "application/json");
 
-        await _httpClient.PostAsync("https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=", )
+        string endpoint = $"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={_apiKey}";
+        var response = await _httpClient.PostAsync(endpoint, content);
+        
+         if (!response.IsSuccessStatusCode)
+        {
+            var err = await response.Content.ReadAsStringAsync();
+            throw new Exception($"Error: {response.StatusCode} - {err}");
+        }
+
+        var jsonResponse = await response.Content.ReadAsStringAsync();
+        // var result = JsonSerializer.Deserialize<GeminiResponse>(jsonResponse, new JsonSerializerOptions
+        // {
+        //     PropertyNameCaseInsensitive = true
+        // });
+
+        // return result?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text ?? "No content generated.";
+    
     }
 }
