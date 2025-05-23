@@ -7,8 +7,12 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddDbContext<JournalContext>(options =>
     options.UseNpgsql(connectionString));
-    
+
+builder.Services.AddSingleton<HttpClient>();
 builder.Services.AddScoped<JournalService>();
+
+// may change to scoped later
+builder.Services.AddSingleton<FreeAITherapist>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

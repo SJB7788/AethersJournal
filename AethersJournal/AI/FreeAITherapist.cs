@@ -1,73 +1,61 @@
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 
 class FreeAITherapist
 {
-    private string _apiKey;
+    private string _endpoint;
     private HttpClient _httpClient;
-    private ChatLog[] _chatLogs;
-    private string _basePrompt = """
-    You are an Therapist that will engage in supportive, reflective conversations based on journal entries given to you. " + 
-        "Your primary goal is to help me (the user) process my thoughts, emotions, and experiences by simulating aspects of a therapeutic conversation.
-    """;
-    private StringBuilder _stringBuilder;
+    private GeminiAPIContent _systemInstruction;
+    private List<GeminiAPIContent> _contentHistory;
 
     public FreeAITherapist(IConfiguration config, HttpClient httpClient)
     {
-        _apiKey = config["GeminiAPIKey"]!;
         _httpClient = httpClient;
-        _chatLogs = [];
+        _endpoint = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={config["GeminiAPIKey"]}";
 
-        _stringBuilder = new StringBuilder(_basePrompt);
-        _stringBuilder.AppendLine("Chat History:");
+        _contentHistory = new();
+
+        _systemInstruction = new(new(), GeminiAPIRole.system);
+        string basePrompt = "You are an Therapist that will engage in supportive, reflective conversations based on journal entries given to you. Your primary goal is to help me (the user) process my thoughts, emotions, and experiences by simulating aspects of a therapeutic conversation.";
+        _systemInstruction.AddPart(basePrompt);
     }
 
     public async Task<string> Converse(string input)
     {
-        // if (_chatLogs.Length != 0)
-        // {
-        //     foreach (ChatLog log in _chatLogs)
-        //     {
-        //         _stringBuilder.AppendLine(log.ToString());
-        //     }
-        // }
+        // create new content 
+        GeminiAPIContent newContent = new(new(), GeminiAPIRole.user);
+        newContent.AddPart(input);
 
-        _stringBuilder.AppendLine(new ChatLog(ChatProfile.User, input).ToString());
+        // add it to content history
+        _contentHistory.Add(newContent);
 
-        var requestBody = new
-        {
-            contents = new[]
-            {
-                new
-                {
-                    parts = new[]
-                    {
-                        new { text = input }
-                    }
-                }
-            }
-        };
+        // create API Request with the content history
+        GeminiAPIRequest requestBody = new GeminiAPIRequest(_contentHistory, _systemInstruction);
+        // Console.WriteLine(requestBody.ToString());
 
+        // serialize
         string json = JsonSerializer.Serialize(requestBody);
+        // Console.WriteLine(json);
         StringContent content = new(json, Encoding.UTF8, "application/json");
 
-        string endpoint = $"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={_apiKey}";
-        var response = await _httpClient.PostAsync(endpoint, content);
-        
-         if (!response.IsSuccessStatusCode)
+        // send request
+        var response = await _httpClient.PostAsync(_endpoint, content);
+
+        if (!response.IsSuccessStatusCode)
         {
             var err = await response.Content.ReadAsStringAsync();
             throw new Exception($"Error: {response.StatusCode} - {err}");
         }
 
+        // read response
         var jsonResponse = await response.Content.ReadAsStringAsync();
-        // var result = JsonSerializer.Deserialize<GeminiResponse>(jsonResponse, new JsonSerializerOptions
-        // {
-        //     PropertyNameCaseInsensitive = true
-        // });
+        Console.WriteLine(jsonResponse);
+        var result = JsonSerializer.Deserialize<GeminiAPIResponse>(jsonResponse, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
 
-        // return result?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text ?? "No content generated.";
-    
+        // no content generated 
+        return result?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text ?? "No content generated.";
     }
 }

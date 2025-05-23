@@ -1,6 +1,7 @@
 ﻿@page "/journal"
 @inject NavigationManager NavManager
 @inject JournalService JournalService
+@inject FreeAITherapist AITherapist
 @rendermode InteractiveServer
 
 <PageTitle>Journal</PageTitle>
@@ -38,7 +39,6 @@
 @code {
     private DateTime selectedDate;
     private string journalContent = String.Empty;
-
     protected override async Task OnParametersSetAsync()
     {
         this.selectedDate = GetQueryDate();
@@ -49,6 +49,9 @@
             this.journalContent = "";
         }
         Console.WriteLine("Journal Entry: " + journalContent);
+
+        @* string response = await AITherapist.Converse("Hello I am having a rough day");
+        Console.WriteLine(response); *@
     }
 
     private DateTime GetQueryDate() {
