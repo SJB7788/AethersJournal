@@ -2,11 +2,13 @@ using Microsoft.EntityFrameworkCore;
 
 public class JournalService
 {
-    public readonly JournalContext _context;
+    private JournalContext _context;
+    private FreeAITherapist _aITherapist;
 
-    public JournalService(JournalContext context)
+    public JournalService(JournalContext context, FreeAITherapist aITherapist)
     {
         _context = context;
+        _aITherapist = aITherapist;
     }
 
     public async Task<JournalEntry?> GetTodaysEntryForUser(int userId)
@@ -47,5 +49,32 @@ public class JournalService
         }
 
         await _context.SaveChangesAsync();
+    }
+
+    public async Task AddSummaryToJournal(int userId, DateTime dateTime)
+    {
+        var entry = await _context.JournalEntries.FirstOrDefaultAsync(journal =>
+            journal.UserId == userId &&
+            journal.Date == dateTime);
+
+        if (entry != null)
+        {
+            string summary = await _aITherapist.Summarize(entry.Content);
+
+            if (summary == "")
+            {
+                Console.WriteLine("Info: Failed to create summary");
+                return;
+            }
+
+            entry.Summary = summary;
+            await _context.SaveChangesAsync();
+        }
+        else
+        {
+            Console.WriteLine("Info: Couldn't find Entry");
+        }
+
+        Console.WriteLine("Info: Summary Saved!");
     }
 }

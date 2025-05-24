@@ -49,9 +49,6 @@
             this.journalContent = "";
         }
         Console.WriteLine("Journal Entry: " + journalContent);
-
-        @* string response = await AITherapist.Converse("Hello I am having a rough day");
-        Console.WriteLine(response); *@
     }
 
     private DateTime GetQueryDate() {
@@ -97,5 +94,6 @@
 
     protected async Task SaveJournal() {
         await JournalService.SaveOrUpdateJournal(1, this.journalContent, this.selectedDate);
+        await JournalService.AddSummaryToJournal(1, this.selectedDate);
     }
 }
