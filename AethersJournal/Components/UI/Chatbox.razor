@@ -1,17 +1,35 @@
+@inject FreeAITherapist AITherapist
+
+<script></script>
+
 <div id="chatbox-button">
-    <div class="button"></div>
+    <div class="button" onclick="ChatBox.openOrCloseChatbox()"></div>
 </div>
 
 <div id="chatbox-body">
-    <div id="chatbox-content">
+    <div id="chatbox-content" @ref="_chatboxDiv">
         <div class="ai-message">Enter any thoughts here and I will respond!</div>
     </div>
     <div id="chatbox-input-container">
-        <input id="chatbox-input" type="text">
-        <div id="chatbox-send"></div>
+        <input id="chatbox-input" type="text" @bind-value="Message">
+        <div id="chatbox-send" @onclick="SendMessage"></div>
     </div>
 </div>
 
 @code {
+    public string Message = String.Empty;
+    private ElementReference _chatboxDiv;
 
+    protected async Task SendMessage() {
+        if (string.IsNullOrEmpty(Message)) return;
+        
+        string response = await AITherapist.Converse(Message);
+        await AddChatBubble(response);
+    }
+
+    protected async Task AddChatBubble(string chatMessage) {
+        await JS.InvokeVoidAsync("ChatBox.addMessage", _chatboxDiv, chatMessage);
+    }
+    
+    [Inject] private IJSRuntime JS { get; set; } = default!;
 }

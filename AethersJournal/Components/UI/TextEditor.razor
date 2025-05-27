@@ -24,7 +24,7 @@
         </div>
     </div>
 
-    <div @ref="EditorDiv" @oninput="HandleInput" contenteditable="true" id="main-text-content"
+    <div @ref="_editorDiv" @oninput="HandleInput" contenteditable="true" id="main-text-content"
         onpaste="TextEditor.handlePaste(event)" onmouseup="TextEditor.saveSelection()"
         onkeyup="TextEditor.saveSelection()" onclick="TextEditor.saveSelection()">
     </div>
@@ -38,7 +38,7 @@
     public EventCallback<string> ContentChanged { get; set; }
     private string _lastRenderContent = String.Empty;
     private bool _contentUpdated = false;
-    private ElementReference EditorDiv;
+    private ElementReference _editorDiv;
 
     [Inject] private IJSRuntime JS { get; set; } = default!;
 
@@ -67,7 +67,7 @@
 
     private async Task HandleInput()
     {
-        var value = await JS.InvokeAsync<string>("TextEditor.getContent", EditorDiv);
+        var value = await JS.InvokeAsync<string>("TextEditor.getContent", _editorDiv);
 
         _lastRenderContent = value;
         Content = value;
@@ -77,6 +77,6 @@
 
     private async Task InsertEntryAsync(string Content)
     {
-        await JS.InvokeVoidAsync("TextEditor.setContent", EditorDiv, Content);
+        await JS.InvokeVoidAsync("TextEditor.setContent", _editorDiv, Content);
     }
 }
