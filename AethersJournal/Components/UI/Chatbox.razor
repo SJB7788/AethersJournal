@@ -1,12 +1,12 @@
 @inject FreeAITherapist AITherapist
 
-<script></script>
+<script defer src="/js/ChatBox.js"></script>
 
-<div id="chatbox-button">
-    <div class="button" onclick="ChatBox.openOrCloseChatbox()"></div>
+<div id="chatbox-button" role="button" onclick="ChatBox.openOrCloseChatbox(event)" data-target="#chatbox-body">
+    <div class="button"></div>
 </div>
 
-<div id="chatbox-body">
+<div id="chatbox-body" class="visible">
     <div id="chatbox-content" @ref="_chatboxDiv">
         <div class="ai-message">Enter any thoughts here and I will respond!</div>
     </div>
