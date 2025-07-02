@@ -22,16 +22,16 @@ public class FreeAITherapist
 
     public async Task<string> Converse(string input)
     {
-        // create new content 
-        GeminiAPIContent newContent = new(new(), GeminiAPIRole.user);
-        newContent.AddPart(input);
+        // create new user content 
+        GeminiAPIContent newUserContent = new(new(), GeminiAPIRole.user);
+        newUserContent.AddPart(input);
 
         // add it to content history
-        _contentHistory.Add(newContent);
+        _contentHistory.Add(newUserContent);
 
         // create API Request with the content history
         GeminiAPIRequest requestBody = new GeminiAPIRequest(_contentHistory, _systemInstruction);
-        // Console.WriteLine(requestBody.ToString());
+        Console.WriteLine(requestBody.ToString());
 
         // serialize
         string json = JsonSerializer.Serialize(requestBody);
@@ -56,7 +56,14 @@ public class FreeAITherapist
         });
 
         Console.WriteLine(result?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text ?? "No content generated.");
-        // no content generated 
+        
+        // create new AI content 
+        GeminiAPIContent newAIContent = new(new(), GeminiAPIRole.model);
+        newAIContent.AddPart(result?.Candidates.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text ?? "");
+
+        // add it to content history
+        _contentHistory.Add(newAIContent);
+
         return result?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text ?? "";
     }
 
