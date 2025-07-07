@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AethersJournal.Migrations
 {
     [DbContext(typeof(JournalContext))]
-    partial class JournalContextModelSnapshot : ModelSnapshot
+    [Migration("20250706000618_updateJournalRelationshipToConversation")]
+    partial class updateJournalRelationshipToConversation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -101,8 +104,7 @@ namespace AethersJournal.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ConversationId")
-                        .IsUnique();
+                    b.HasIndex("ConversationId");
 
                     b.HasIndex("UserId");
 
@@ -154,8 +156,8 @@ namespace AethersJournal.Migrations
             modelBuilder.Entity("JournalEntry", b =>
                 {
                     b.HasOne("Conversation", "Conversation")
-                        .WithOne()
-                        .HasForeignKey("JournalEntry", "ConversationId")
+                        .WithMany()
+                        .HasForeignKey("ConversationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

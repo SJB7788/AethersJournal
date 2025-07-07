@@ -49,34 +49,30 @@
 
 #chatbox-content {
   width: 100%;
+  padding: 0 5px;
   height: calc(90%);
-  overflow-y: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 }
 
-.ai-message,
-.user-message {
-  font-family: var(--desc-font-family);
-  font-size: 0.85em;
-  border-radius: 15px;
-  padding: 10px;
-  margin: 5px 0;
-  max-width: 70%;
-  word-wrap: break-word;
+#chatbox-content::-webkit-scrollbar {
+  width: 8px;
 }
 
-.ai-message {
-  color: var(--chatbox-ai-message-text-color);
-  background-color: var(--chatbox-ai-message-bg-color);
-  align-self: flex-start;
+#chatbox-content::-webkit-scrollbar-track {
+  background: var(--chatbox-ai-message-bg-color);
+  border-radius: 10px;
 }
 
-.user-message {
-  color: var(--chatbox-user-message-text-color);
-  background-color: var(--chatbox-user-message-bg-color);
-  align-self: flex-end;
+#chatbox-content::-webkit-scrollbar-thumb {
+  background: var(--title-color);
+  border-radius: 10px;
+}
+
+#chatbox-content::-webkit-scrollbar-thumb:hover {
+  background: var(--title-fainted-color);
 }
 
 #chatbox-input-container {

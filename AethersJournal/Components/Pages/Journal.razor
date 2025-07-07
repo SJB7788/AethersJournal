@@ -9,7 +9,7 @@
     <div class="journal-header">
         <div class="header-title">
             <div class="title-date">
-                <h1 class="date">Sunday, April 20 2025</h1>
+                <h1 class="date">@selectedDate.ToString("dddd, MMMM dd yyyy")</h1>
                 <span class="dropdown"></span>
             </div>
             <div class="title-controller">
@@ -92,7 +92,7 @@
     }
 
     protected async Task SaveJournal() {
-        await JournalService.SaveOrUpdateJournal(1, this.journalContent, this.selectedDate);
-        await JournalService.AddSummaryToJournal(1, this.selectedDate);
+        Console.WriteLine(this.journalContent);
+        await JournalService.SaveOrUpdateAndSummarizeAsync(1, this.journalContent, this.selectedDate);
     }
 }

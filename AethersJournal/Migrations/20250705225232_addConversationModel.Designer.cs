@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AethersJournal.Migrations
 {
     [DbContext(typeof(JournalContext))]
-    partial class JournalContextModelSnapshot : ModelSnapshot
+    [Migration("20250705225232_addConversationModel")]
+    partial class addConversationModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,9 +31,6 @@ namespace AethersJournal.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("JournalId")
-                        .HasColumnType("integer");
 
                     b.Property<DateTime>("StartedAt")
                         .HasColumnType("timestamp with time zone");
@@ -86,9 +86,6 @@ namespace AethersJournal.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("ConversationId")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
 
@@ -100,9 +97,6 @@ namespace AethersJournal.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ConversationId")
-                        .IsUnique();
 
                     b.HasIndex("UserId");
 
@@ -153,19 +147,11 @@ namespace AethersJournal.Migrations
 
             modelBuilder.Entity("JournalEntry", b =>
                 {
-                    b.HasOne("Conversation", "Conversation")
-                        .WithOne()
-                        .HasForeignKey("JournalEntry", "ConversationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("User", "User")
                         .WithMany("JournalEntries")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Conversation");
 
                     b.Navigation("User");
                 });

@@ -1,0 +1,22 @@
+.ai-message,
+.user-message {
+  font-family: var(--desc-font-family);
+  font-size: 0.85em;
+  border-radius: 15px;
+  padding: 10px;
+  margin: 5px 0;
+  max-width: 70%;
+  word-wrap: break-word;
+}
+
+.ai-message {
+  color: var(--chatbox-ai-message-text-color);
+  background-color: var(--chatbox-ai-message-bg-color);
+  align-self: flex-start;
+}
+
+.user-message {
+  color: var(--chatbox-user-message-text-color);
+  background-color: var(--chatbox-user-message-bg-color);
+  align-self: flex-end;
+}
