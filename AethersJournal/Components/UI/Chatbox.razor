@@ -1,4 +1,6 @@
 @inject FreeAITherapist AITherapist
+@inject JournalService JournalService
+@inject JournalStateService JournalStateService
 
 <script defer src="/js/ChatBox.js"></script>
 
@@ -18,20 +20,60 @@
 
 @code {
     public string Message = String.Empty;
+    private int _journalId;
     private ElementReference _chatboxDiv;
-
-    protected async Task SendMessage() {
-        if (string.IsNullOrEmpty(Message)) return;
-
-        await AddChatBubble(Message, true);
-        
-        string response = await AITherapist.Converse(Message);
-        await AddChatBubble(response, false);
+    protected override void OnInitialized()
+    {
+        JournalStateService.OnJournalChangedAsync += HandleJournalChange;
     }
 
-    protected async Task AddChatBubble(string chatMessage, bool isHuman) {
-        await JS.InvokeVoidAsync("ChatBox.addMessage", _chatboxDiv, chatMessage, isHuman);
+    public async Task HandleJournalChange(int journalId)
+    {
+        this._journalId = journalId;
+        List<ConversationMessage>? messages = await JournalService.GetAllConversationMessage(journalId);
+
+        if (messages != null)
+        {
+            foreach (var message in messages)
+            {
+                await AddChatBubble(message.Content, message.Role == ChatProfile.User);
+            }
+        }
+
+        StateHasChanged();
     }
-    
+
+    protected async Task SendMessage()
+    {
+        if (string.IsNullOrEmpty(Message) || this._journalId == 0) return;
+
+        try
+        {
+            // save user message to db and add change to UI
+            await JournalService.AddConversationMessage(this._journalId, this.Message, ChatProfile.User);
+            await AddChatBubble(Message, isUser: true);
+
+            string response = await AITherapist.Converse(Message);
+
+            await JournalService.AddConversationMessage(this._journalId, response, ChatProfile.AI);
+            await AddChatBubble(response, isUser: false);
+        }
+        catch
+        {
+            Console.WriteLine("Error: Something went wrong. Please try again.");
+            await AddChatBubble("I'm having trouble responding. Try again later.", isUser: false);
+        }
+    }
+
+    protected async Task AddChatBubble(string chatMessage, bool isUser)
+    {
+        await JS.InvokeVoidAsync("ChatBox.addMessage", _chatboxDiv, chatMessage, isUser);
+    }
+
+    public void Dispose()
+    {
+        JournalStateService.OnJournalChangedAsync -= HandleJournalChange;
+    }
+
     [Inject] private IJSRuntime JS { get; set; } = default!;
 }

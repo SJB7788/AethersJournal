@@ -1,3 +1,4 @@
+using AethersJournal.Migrations;
 using Microsoft.EntityFrameworkCore;
 
 public class JournalService
@@ -125,10 +126,11 @@ public class JournalService
         Console.WriteLine("Info: Summary Saved!");
     }
 
-    public async Task SaveOrUpdateAndSummarizeAsync(int userId, string content, DateTime date)
+    public async Task<JournalEntry> SaveOrUpdateAndSummarizeAsync(int userId, string content, DateTime date)
     {
         var journal = await SaveOrUpdateJournal(userId, content, date);
         await AddSummaryToJournal(journal);
+        return journal;
     }
 
     // create conversation and return conversation id
@@ -169,5 +171,22 @@ public class JournalService
         
         await _context.SaveChangesAsync();
         Console.WriteLine("Info: Message Saved!");
+    }
+
+    public async Task<List<ConversationMessage>?> GetAllConversationMessage(int journalId) {
+        var entry = await _context.Conversations.FirstOrDefaultAsync(c => c.JournalId == journalId);
+        
+        if (entry == null) {
+            Console.WriteLine("Conversation does not exist!");
+            return null;
+        }
+
+        return await _context.ConversationMessages.Where(m => m.ConversationId == entry.Id).ToListAsync();
+    }
+
+    // get journalID based on UserID and Date
+    public async Task<JournalEntry?> GetJournalEntryFromUserIdAndDate(int userId, DateTime date) {
+        JournalEntry? entry = await _context.JournalEntries.FirstOrDefaultAsync(j => j.UserId == userId && j.Date == date);
+        return entry;
     }
 }

@@ -1,6 +1,8 @@
 ﻿@page "/journal"
 @inject NavigationManager NavManager
 @inject JournalService JournalService
+@inject JournalStateService JournalStateService
+
 @rendermode InteractiveServer
 
 <PageTitle>Journal</PageTitle>
@@ -9,7 +11,7 @@
     <div class="journal-header">
         <div class="header-title">
             <div class="title-date">
-                <h1 class="date">@selectedDate.ToString("dddd, MMMM dd yyyy")</h1>
+                <h1 class="date">@_selectedDate.ToString("dddd, MMMM dd yyyy")</h1>
                 <span class="dropdown"></span>
             </div>
             <div class="title-controller">
@@ -29,28 +31,45 @@
     </div>
 
     <div class="journal-contents">
-        <TextEditor @bind-Content="journalContent" @key="selectedDate"/>
-        <Chatbox />
+        <TextEditor @bind-Content="_journalContent" @key="_selectedDate" />
+        <Chatbox @ref="_chatboxComponent" /> @* @bind-JournalId="_journalId" *@
     </div>
 </div>
 
 
 @code {
-    private DateTime selectedDate;
-    private string journalContent = String.Empty;
+    private DateTime _selectedDate;
+    private string _journalContent = String.Empty;
+    private int _journalId;
+    private Chatbox? _chatboxComponent;
+
     protected override async Task OnParametersSetAsync()
     {
-        this.selectedDate = GetQueryDate();
-        JournalEntry? entry = await JournalService.GetEntryForUser(1, this.selectedDate);
-        if (entry != null) {
-            this.journalContent = entry.Content;
-        } else {
-            this.journalContent = "";
+        this._selectedDate = GetQueryDate();
+        JournalEntry? entry = await JournalService.GetEntryForUser(1, this._selectedDate);
+        if (entry != null)
+        {
+            this._journalContent = entry.Content;
+            this._journalId = entry.Id;
         }
-        Console.WriteLine("Journal Entry: " + journalContent);
+        else
+        {
+            this._journalContent = "";
+        }
+        Console.WriteLine("Journal Entry: " + _journalContent);
     }
 
-    private DateTime GetQueryDate() {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_chatboxComponent != null && _journalId != 0)
+        {
+            Console.WriteLine("Set Journal Id: " + _journalId);
+            await JournalStateService.SetJournalIdAsync(_journalId);
+        }
+    }
+
+    private DateTime GetQueryDate()
+    {
         Uri uri = NavManager.ToAbsoluteUri(NavManager.Uri);
         var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
 
@@ -61,7 +80,8 @@
         {
             date = DateTime.SpecifyKind(parsedDate.Date, DateTimeKind.Utc);
             // check if the date is ahead of current date
-            if (date > DateTime.UtcNow.Date) {
+            if (date > DateTime.UtcNow.Date)
+            {
                 date = DateTime.UtcNow.Date;
                 NavManager.NavigateTo("/journal");
             }
@@ -70,29 +90,36 @@
         {
             date = DateTime.UtcNow.Date;
         }
-    
+
         return date;
     }
 
-    protected void Previous() {
-        this.selectedDate = this.selectedDate.AddDays(-1);
-        string formattedDate = this.selectedDate.ToString("yyy-MM-dd");
+    protected void Previous()
+    {
+        this._selectedDate = this._selectedDate.AddDays(-1);
+        string formattedDate = this._selectedDate.ToString("yyy-MM-dd");
 
         NavManager.NavigateTo($"/journal?date={formattedDate}");
         // Temporary Solution to TextEditor not rerendering
         NavManager.Refresh(true);
     }
 
-    protected void Next() {
-        this.selectedDate = this.selectedDate.AddDays(1);
-        string formattedDate = this.selectedDate.ToString("yyy-MM-dd");
+    protected void Next()
+    {
+        this._selectedDate = this._selectedDate.AddDays(1);
+        string formattedDate = this._selectedDate.ToString("yyy-MM-dd");
 
         NavManager.NavigateTo($"/journal?date={formattedDate}");
         NavManager.Refresh(true);
     }
 
-    protected async Task SaveJournal() {
-        Console.WriteLine(this.journalContent);
-        await JournalService.SaveOrUpdateAndSummarizeAsync(1, this.journalContent, this.selectedDate);
+    protected async Task SaveJournal()
+    {
+        JournalEntry entry = await JournalService.SaveOrUpdateAndSummarizeAsync(1, this._journalContent, this._selectedDate);
+        await JournalService.CreateConversation(1, entry.Id);
+
+        if (this._journalId != entry.Id) {
+            await JournalStateService.SetJournalIdAsync(entry.Id);
+        }
     }
 }

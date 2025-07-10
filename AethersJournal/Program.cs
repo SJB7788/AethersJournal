@@ -6,10 +6,11 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 builder.Services.AddDbContext<JournalContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(connectionString), ServiceLifetime.Scoped);
 
 builder.Services.AddSingleton<HttpClient>();
 builder.Services.AddScoped<JournalService>();
+builder.Services.AddScoped<JournalStateService>();
 
 // may change to scoped later
 builder.Services.AddSingleton<FreeAITherapist>();
