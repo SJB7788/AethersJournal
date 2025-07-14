@@ -31,7 +31,7 @@
     </div>
 
     <div class="journal-contents">
-        <TextEditor @bind-Content="_journalContent" @key="_selectedDate" />
+        <TextEditor @bind-Content="_journalContent" @bind-Title="_journalTitle" @key="_selectedDate" />
         <Chatbox @ref="_chatboxComponent" /> @* @bind-JournalId="_journalId" *@
     </div>
 </div>
@@ -40,6 +40,7 @@
 @code {
     private DateTime _selectedDate;
     private string _journalContent = String.Empty;
+    private string _journalTitle = String.Empty;
     private int _journalId;
     private Chatbox? _chatboxComponent;
 
@@ -50,6 +51,7 @@
         if (entry != null)
         {
             this._journalContent = entry.Content;
+            this._journalTitle = entry.Title;
             this._journalId = entry.Id;
         }
         else
@@ -63,7 +65,6 @@
     {
         if (_chatboxComponent != null && _journalId != 0)
         {
-            Console.WriteLine("Set Journal Id: " + _journalId);
             await JournalStateService.SetJournalIdAsync(_journalId);
         }
     }
@@ -115,7 +116,8 @@
 
     protected async Task SaveJournal()
     {
-        JournalEntry entry = await JournalService.SaveOrUpdateAndSummarizeAsync(1, this._journalContent, this._selectedDate);
+        Console.WriteLine(_journalTitle);
+        JournalEntry entry = await JournalService.SaveOrUpdateAndSummarizeAsync(1, this._journalTitle, this._journalContent, this._selectedDate);
         await JournalService.CreateConversation(1, entry.Id);
 
         if (this._journalId != entry.Id) {

@@ -85,10 +85,18 @@ window.TextEditor = {
     element.innerHTML = journalContent;
   },
 
+  setTitle: function (element, journalTitle) {
+    element.value = journalTitle;
+  },
+
   // Extract Content
   getContent: function (element) {
     return element.innerHTML;
   },
+
+  getTitleContent: function(element) {
+    return element.value;
+  }
 };
 
 document.addEventListener("mouseup", () => TextEditor.saveSelection());

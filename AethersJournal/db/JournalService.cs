@@ -45,13 +45,19 @@ public class JournalService
     /// <param name="userId">The ID of the user to save the entry for</param>
     /// <param name="journalEntry">The content of the journal entry</param>
     /// <param name="dateTime">The date and time of the journal entry</param>
-    public async Task<JournalEntry> SaveOrUpdateJournal(int userId, string journalEntry, DateTime dateTime)
+    public async Task<(JournalEntry entry, string? originalContent)> SaveOrUpdateJournal(int userId, string journalTitle, string journalEntry, DateTime dateTime)
     {
         JournalEntry? entry = await _context.JournalEntries.FirstOrDefaultAsync(j => j.UserId == userId && j.Date.Date == dateTime);
 
+        string? originalContent = null;
+
         if (entry != null)
         {
+            // save original content
+            originalContent = entry.Content;
+
             entry.Content = journalEntry;
+            entry.Title = journalTitle;
             _context.JournalEntries.Update(entry);
         }
         else
@@ -61,6 +67,7 @@ public class JournalService
                 UserId = userId,
                 Date = dateTime,
                 Content = journalEntry,
+                Title = journalTitle,
 
                 Conversation = new()
                 { // conversation is also created
@@ -75,43 +82,28 @@ public class JournalService
         }
 
         await _context.SaveChangesAsync();
-        return entry;
+        return (entry, originalContent);
     }
 
-    /// <summary>
-    /// Adds a summary to a journal entry for a user
-    /// </summary>
-    /// <param name="userId">The ID of the user to add the summary for</param>
-    /// <param name="dateTime">The date and time of the journal entry to add the summary to</param>
-    public async Task AddSummaryToJournal(int userId, DateTime dateTime)
+    private bool ShouldSummarize(string newContent, string? oldContent)
     {
-        var entry = await _context.JournalEntries.FirstOrDefaultAsync(journal =>
-            journal.UserId == userId &&
-            journal.Date == dateTime);
+        if (string.IsNullOrWhiteSpace(newContent))
+            return false;
 
-        if (entry != null)
-        {
-            string summary = await _aITherapist.Summarize(entry.Content);
+        if (string.IsNullOrWhiteSpace(oldContent))
+            return true;
 
-            if (string.IsNullOrWhiteSpace(summary))
-            {
-                Console.WriteLine("Info: Failed to create summary");
-                return;
-            }
-
-            entry.Summary = summary;
-            await _context.SaveChangesAsync();
-        }
-        else
-        {
-            Console.WriteLine("Info: Couldn't find Entry");
-        }
-
-        Console.WriteLine("Info: Summary Saved!");
+        return !string.Equals(oldContent, newContent, StringComparison.Ordinal);
     }
 
-    private async Task AddSummaryToJournal(JournalEntry entry)
+    private async Task AddSummaryToJournal(JournalEntry entry, string? oldContent)
     {
+        // check if summary is neccesary
+        if (!ShouldSummarize(entry.Content, oldContent))
+        {
+            return;
+        }
+
         string summary = await _aITherapist.Summarize(entry.Content);
 
         if (string.IsNullOrWhiteSpace(summary))
@@ -126,10 +118,11 @@ public class JournalService
         Console.WriteLine("Info: Summary Saved!");
     }
 
-    public async Task<JournalEntry> SaveOrUpdateAndSummarizeAsync(int userId, string content, DateTime date)
+    public async Task<JournalEntry> SaveOrUpdateAndSummarizeAsync(int userId, string title, string content, DateTime date)
     {
-        var journal = await SaveOrUpdateJournal(userId, content, date);
-        await AddSummaryToJournal(journal);
+        var (journal, originalContent) = await SaveOrUpdateJournal(userId, title, content, date);
+        await AddSummaryToJournal(journal, originalContent);
+
         return journal;
     }
 
@@ -155,12 +148,14 @@ public class JournalService
     {
         var entry = await _context.Conversations.FirstOrDefaultAsync(c => c.JournalId == journalId);
 
-        if (entry == null) {
+        if (entry == null)
+        {
             Console.WriteLine("Conversation does not exist!");
             return;
         }
 
-        ConversationMessage message = new() {
+        ConversationMessage message = new()
+        {
             ConversationId = entry.Id,
             Content = content,
             Role = role,
@@ -168,15 +163,17 @@ public class JournalService
         };
 
         _context.ConversationMessages.Add(message);
-        
+
         await _context.SaveChangesAsync();
         Console.WriteLine("Info: Message Saved!");
     }
 
-    public async Task<List<ConversationMessage>?> GetAllConversationMessage(int journalId) {
+    public async Task<List<ConversationMessage>?> GetAllConversationMessage(int journalId)
+    {
         var entry = await _context.Conversations.FirstOrDefaultAsync(c => c.JournalId == journalId);
-        
-        if (entry == null) {
+
+        if (entry == null)
+        {
             Console.WriteLine("Conversation does not exist!");
             return null;
         }
@@ -185,7 +182,8 @@ public class JournalService
     }
 
     // get journalID based on UserID and Date
-    public async Task<JournalEntry?> GetJournalEntryFromUserIdAndDate(int userId, DateTime date) {
+    public async Task<JournalEntry?> GetJournalEntryFromUserIdAndDate(int userId, DateTime date)
+    {
         JournalEntry? entry = await _context.JournalEntries.FirstOrDefaultAsync(j => j.UserId == userId && j.Date == date);
         return entry;
     }

@@ -2,7 +2,7 @@
 
 <div class="text-main">
     <div class="main-header">
-        <input type="text" name="title" id="main-title" placeholder="Title">
+        <input @ref="_titleInput" @oninput="HandleTitleInput" type="text" name="title" id="main-title" placeholder="Title">
 
         <div class="text-controller">
             <div class="open-controller">
@@ -24,7 +24,7 @@
         </div>
     </div>
 
-    <div @ref="_editorDiv" @oninput="HandleInput" contenteditable="true" id="main-text-content"
+    <div @ref="_editorDiv" @oninput="HandleContentInput" contenteditable="true" id="main-text-content"
         onpaste="TextEditor.handlePaste(event)" onmouseup="TextEditor.saveSelection()"
         onkeyup="TextEditor.saveSelection()" onclick="TextEditor.saveSelection()">
     </div>
@@ -33,12 +33,18 @@
 @code {
     [Parameter]
     public string Content { get; set; } = String.Empty;
+    [Parameter]
+    public string Title { get; set; } = String.Empty;
 
     [Parameter]
     public EventCallback<string> ContentChanged { get; set; }
-    private string _lastRenderContent = String.Empty;
+    [Parameter]
+    public EventCallback<string> TitleChanged { get; set; }
+
+    @* private string _lastRenderContent = String.Empty; *@
     private bool _contentUpdated = false;
     private ElementReference _editorDiv;
+    private ElementReference _titleInput;
 
     [Inject] private IJSRuntime JS { get; set; } = default!;
 
@@ -60,23 +66,32 @@
     {
         if (firstRender && !string.IsNullOrWhiteSpace(Content))
         {
-            await InsertEntryAsync(Content);
+            await InsertEntryAsync(Content, Title);
             _contentUpdated = false;
         }
     }
 
-    private async Task HandleInput()
+    private async Task HandleContentInput()
     {
         var value = await JS.InvokeAsync<string>("TextEditor.getContent", _editorDiv);
 
-        _lastRenderContent = value;
+        @* _lastRenderContent = value; *@
         Content = value;
 
         await ContentChanged.InvokeAsync(Content);
     }
 
-    private async Task InsertEntryAsync(string Content)
+    private async Task HandleTitleInput(){
+        var value = await JS.InvokeAsync<string>("TextEditor.getTitleContent", _titleInput);
+
+        Title = value;
+
+        await TitleChanged.InvokeAsync(Title);
+    }
+
+    private async Task InsertEntryAsync(string Content, string Title)
     {
         await JS.InvokeVoidAsync("TextEditor.setContent", _editorDiv, Content);
+        await JS.InvokeVoidAsync("TextEditor.setTitle", _titleInput, Title);
     }
 }
