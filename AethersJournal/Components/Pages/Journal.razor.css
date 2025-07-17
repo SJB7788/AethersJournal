@@ -4,6 +4,7 @@
 } */
 
 .main-journal-container {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -85,4 +86,20 @@
   flex: 1;
   height: 100%;
   user-select: none;
+}
+
+.saving-message {
+  position: absolute;
+  visibility: hidden;
+  opacity: 0;
+  top: 95%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--desc-font-family);
+  font-size: 1em;
+  color: white;
+  background-color: var(--title-color);
+  padding: 10px 20px;
+  border-radius: 50px;
+  transition: visibility 200ms, opacity 200ms !important;
 }

@@ -101,15 +101,3 @@
   background-image: url('data:image/svg+xml,<svg id="chatbox-send-icon" xmlns="http://www.w3.org/2000/svg" height="35px" viewBox="0 -960 960 960" width="35px" fill="%23f7f6f2"><path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z" /></svg>');
   cursor: pointer;
 }
-
-.hidden {
-  visibility: hidden !important;
-  opacity: 0 !important;
-  transition: opacity 100ms ease-in !important;
-}
-
-.visible {
-  visibility: visible !important;
-  opacity: 1 !important;
-  transition: opacity 100ms ease-in-out !important;
-}

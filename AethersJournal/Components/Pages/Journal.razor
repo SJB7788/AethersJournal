@@ -6,6 +6,7 @@
 @rendermode InteractiveServer
 
 <PageTitle>Journal</PageTitle>
+<script defer src="/js/Journal.js"></script>
 
 <div class="main-journal-container">
     <div class="journal-header">
@@ -18,7 +19,6 @@
                 <button class="save" @onclick="SaveJournal">
                     Save Journal
                 </button>
-                <p>Saving...</p>
             </div>
         </div>
         <div class="header-controller">
@@ -34,6 +34,8 @@
         <TextEditor @bind-Content="_journalContent" @bind-Title="_journalTitle" @key="_selectedDate" />
         <Chatbox @ref="_chatboxComponent" /> @* @bind-JournalId="_journalId" *@
     </div>
+
+    <div @ref="_saveMessage" class="saving-message">Saving...</div>
 </div>
 
 
@@ -43,6 +45,7 @@
     private string _journalTitle = String.Empty;
     private int _journalId;
     private Chatbox? _chatboxComponent;
+    private ElementReference _saveMessage;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -54,7 +57,7 @@
             this._journalTitle = entry.Title;
             this._journalId = entry.Id;
         }
-        
+
         Console.WriteLine("Journal Entry: " + _journalContent);
     }
 
@@ -113,12 +116,20 @@
 
     protected async Task SaveJournal()
     {
-        Console.WriteLine(_journalTitle);
+        await ShowSavingMessage("Saving...");
         JournalEntry entry = await JournalService.SaveOrUpdateAndSummarizeAsync(1, this._journalTitle, this._journalContent, this._selectedDate);
+        await ShowSavingMessage("Saved!", 2000);
         await JournalService.CreateConversation(1, entry.Id);
 
-        if (this._journalId != entry.Id) {
+        if (this._journalId != entry.Id)
+        {
             await JournalStateService.SetJournalIdAsync(entry.Id);
         }
     }
+
+    protected async Task ShowSavingMessage(string message, int duration = 1000)
+    {
+        await JS.InvokeVoidAsync("Journal.showSaveMessage", _saveMessage, message, duration);
+    }
+    [Inject] private IJSRuntime JS { get; set; } = default!;
 }

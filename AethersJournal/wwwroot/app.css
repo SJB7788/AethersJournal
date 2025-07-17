@@ -92,3 +92,15 @@ h1:focus {
 .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+.hidden {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  transition: opacity 100ms ease-in !important;
+}
+
+.visible {
+  visibility: visible !important;
+  opacity: 1 !important;
+  transition: visibility 200ms, opacity 200ms !important;
+}
