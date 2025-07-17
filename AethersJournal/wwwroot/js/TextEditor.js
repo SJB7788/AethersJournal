@@ -1,4 +1,16 @@
 window.TextEditor = {
+  // For cooperation with C#
+  // Insert Content
+  setContent: function (element, journalContent) {
+    element.value = journalContent;
+  },
+
+  // Extract Content
+  getContent: function (element) {
+    return element.value;
+  },
+
+  // CURRENTLY NOT USED
   currSelection: null,
 
   // Selection related functions
@@ -42,11 +54,7 @@ window.TextEditor = {
     element.remove();
     this.currSelection.insertNode(span);
   },
-
-  checkContainer: function (event) {
-    console.log(this.currSelection);
-  },
-
+  
   handlePaste: function (event) {
     event.preventDefault();
     const text = (event.clipboardData || window.clipboardData).getData(
@@ -79,24 +87,9 @@ window.TextEditor = {
     });
   },
 
-  // For cooperation with C#
-  // Insert Content
-  setContent: function (element, journalContent) {
-    element.innerHTML = journalContent;
+  checkContainer: function (event) {
+    console.log(this.currSelection);
   },
-
-  setTitle: function (element, journalTitle) {
-    element.value = journalTitle;
-  },
-
-  // Extract Content
-  getContent: function (element) {
-    return element.innerHTML;
-  },
-
-  getTitleContent: function(element) {
-    return element.value;
-  }
 };
 
-document.addEventListener("mouseup", () => TextEditor.saveSelection());
+// document.addEventListener("mouseup", () => TextEditor.saveSelection());

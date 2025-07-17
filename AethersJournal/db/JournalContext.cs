@@ -20,7 +20,8 @@ public class JournalContext : DbContext
         modelBuilder.Entity<JournalEntry>()
             .HasOne(j => j.Conversation)
             .WithOne()
-            .HasForeignKey<JournalEntry>(j => j.ConversationId);
+            .HasForeignKey<JournalEntry>(j => j.ConversationId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         modelBuilder.Entity<Conversation>()
             .HasOne(c => c.User)

@@ -58,6 +58,8 @@ public class JournalService
 
             entry.Content = journalEntry;
             entry.Title = journalTitle;
+            Console.WriteLine("Content: " + entry.Content);
+            Console.WriteLine("Title: " + entry.Title);
             _context.JournalEntries.Update(entry);
         }
         else
@@ -126,9 +128,19 @@ public class JournalService
         return journal;
     }
 
+    public async Task<bool> ConversationExists(int userId, int journalId) {
+        var journalExists = await _context.Conversations.FirstOrDefaultAsync(c => c.UserId == userId && c.JournalId == journalId);
+
+        return !(journalExists == null);
+    }
+
     // create conversation and return conversation id
     public async Task<int> CreateConversation(int userId, int journalId)
     {
+        if (await ConversationExists(userId, journalId)) {
+            return -1;
+        }
+
         Conversation conversation = new()
         {
             UserId = userId,

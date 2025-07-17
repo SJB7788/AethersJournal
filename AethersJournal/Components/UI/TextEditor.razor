@@ -24,10 +24,13 @@
         </div>
     </div>
 
-    <div @ref="_editorDiv" @oninput="HandleContentInput" contenteditable="true" id="main-text-content"
+    <textarea @ref="_editorDiv" @oninput="HandleContentInput" @onpaste="HandleContentInput" name="textEditor" id="main-text-content"></textarea>
+    
+    @* using content editable div was a bit too complicated so sticking with text area for now *@
+    @* <div @ref="_editorDiv" @oninput="HandleContentInput" contenteditable="true" id="main-text-content"
         onpaste="TextEditor.handlePaste(event)" onmouseup="TextEditor.saveSelection()"
         onkeyup="TextEditor.saveSelection()" onclick="TextEditor.saveSelection()">
-    </div>
+    </div> *@
 </div>
 
 @code {
@@ -64,7 +67,7 @@
     // Temporary fix is in Journal.Razor where we hard refresh everytime we go Prev or Next
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && !string.IsNullOrWhiteSpace(Content))
+        if (firstRender)
         {
             await InsertEntryAsync(Content, Title);
             _contentUpdated = false;
@@ -82,8 +85,7 @@
     }
 
     private async Task HandleTitleInput(){
-        var value = await JS.InvokeAsync<string>("TextEditor.getTitleContent", _titleInput);
-
+        var value = await JS.InvokeAsync<string>("TextEditor.getContent", _titleInput);
         Title = value;
 
         await TitleChanged.InvokeAsync(Title);
@@ -92,6 +94,6 @@
     private async Task InsertEntryAsync(string Content, string Title)
     {
         await JS.InvokeVoidAsync("TextEditor.setContent", _editorDiv, Content);
-        await JS.InvokeVoidAsync("TextEditor.setTitle", _titleInput, Title);
+        await JS.InvokeVoidAsync("TextEditor.setContent", _titleInput, Title);
     }
 }
