@@ -21,15 +21,20 @@
 @code {
     public string Message = String.Empty;
     private int _journalId;
+    private string _entrySummary = String.Empty;
     private ElementReference _chatboxDiv;
     protected override void OnInitialized()
     {
         JournalStateService.OnJournalChangedAsync += HandleJournalChange;
     }
 
-    public async Task HandleJournalChange(int journalId)
+    public async Task HandleJournalChange(int journalId, string journalSummary)
     {
         this._journalId = journalId;
+        this._entrySummary = journalSummary;
+
+        AITherapist.AddToSystemPrompt($"Journal Entry Summary: {journalSummary}");
+
         List<ConversationMessage>? messages = await JournalService.GetAllConversationMessage(journalId);
 
         if (messages != null)
@@ -37,6 +42,7 @@
             foreach (var message in messages)
             {
                 await AddChatBubble(message.Content, message.Role == ChatProfile.User);
+                AITherapist.AddToContentHistory(message.Content, message.Role == ChatProfile.User ? GeminiAPIRole.user : GeminiAPIRole.model);
             }
         }
 

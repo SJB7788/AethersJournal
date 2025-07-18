@@ -18,10 +18,10 @@ public class GeminiAPIContent
 {
     [JsonPropertyName("role")]
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public GeminiAPIRole? Role {get; set;}
+    public GeminiAPIRole? Role { get; set; }
 
     [JsonPropertyName("parts")]
-    public List<GeminiAPIPart> Parts {get; set;}
+    public List<GeminiAPIPart> Parts { get; set; }
 
     public GeminiAPIContent(List<GeminiAPIPart> parts, GeminiAPIRole? role = null)
     {
@@ -33,6 +33,11 @@ public class GeminiAPIContent
     {
         GeminiAPIPart newPart = new(text);
         Parts.Add(newPart);
+    }
+
+    public override string ToString()
+    {
+        return $"Role: {Role}\nPart: {Parts[0].Text}";
     }
 }
 

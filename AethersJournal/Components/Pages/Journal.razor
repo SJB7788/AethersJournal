@@ -41,8 +41,9 @@
 
 @code {
     private DateTime _selectedDate;
-    private string _journalContent = String.Empty;
     private string _journalTitle = String.Empty;
+    private string _journalContent = String.Empty;
+    private string _journalSummary = String.Empty;
     private int _journalId;
     private Chatbox? _chatboxComponent;
     private ElementReference _saveMessage;
@@ -55,6 +56,7 @@
         {
             this._journalContent = entry.Content;
             this._journalTitle = entry.Title;
+            this._journalSummary = entry.Summary;
             this._journalId = entry.Id;
         }
 
@@ -65,7 +67,7 @@
     {
         if (_chatboxComponent != null && _journalId != 0)
         {
-            await JournalStateService.SetJournalIdAsync(_journalId);
+            await JournalStateService.SetJournalInfoAsync(_journalId, _journalSummary);
         }
     }
 
@@ -123,7 +125,7 @@
 
         if (this._journalId != entry.Id)
         {
-            await JournalStateService.SetJournalIdAsync(entry.Id);
+            await JournalStateService.SetJournalInfoAsync(entry.Id, entry.Summary);
         }
     }
 

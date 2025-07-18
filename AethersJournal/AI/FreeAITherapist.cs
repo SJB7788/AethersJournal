@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
@@ -22,6 +23,11 @@ public class FreeAITherapist
 
     public async Task<string> Converse(string input)
     {
+        // for (var i = 0; i < _contentHistory.Count; i++)
+        // {
+        //     Console.WriteLine(_contentHistory[i].ToString());
+        // }
+
         // create new user content 
         GeminiAPIContent newUserContent = new(new(), GeminiAPIRole.user);
         newUserContent.AddPart(input);
@@ -31,7 +37,7 @@ public class FreeAITherapist
 
         // create API Request with the content history
         GeminiAPIRequest requestBody = new GeminiAPIRequest(_contentHistory, _systemInstruction);
-        Console.WriteLine(requestBody.ToString());
+        // Console.WriteLine(requestBody.ToString());
 
         // serialize
         string json = JsonSerializer.Serialize(requestBody);
@@ -49,14 +55,13 @@ public class FreeAITherapist
 
         // read response
         var jsonResponse = await response.Content.ReadAsStringAsync();
-        Console.WriteLine(jsonResponse);
         var result = JsonSerializer.Deserialize<GeminiAPIResponse>(jsonResponse, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         });
 
-        Console.WriteLine(result?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text ?? "No content generated.");
-        
+        // Console.WriteLine(result?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text ?? "No content generated.");
+
         // create new AI content 
         GeminiAPIContent newAIContent = new(new(), GeminiAPIRole.model);
         newAIContent.AddPart(result?.Candidates.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text ?? "");
@@ -75,13 +80,13 @@ public class FreeAITherapist
 
         // add base prompt
         GeminiAPIContent systemInstruction = new(new(), GeminiAPIRole.system);
-        systemInstruction.AddPart("This is a journal entry. This summary will be given to a therapist. Summarize this journal entry to be helpful to a therapist, emphasizing on the emotions, things the person wants to accomplish, wishes to do, etc.");
+        systemInstruction.AddPart("This is a journal entry. This summary will be given to a therapist. Summarize this journal entry to be helpful to a therapist, emphasizing on the emotions, things the person wants to accomplish, wishes to do, etc. Do not add any AI statements, just simply summarize.");
 
         // create request
         GeminiAPIRequest requestBody = new GeminiAPIRequest(new() { newContent }, systemInstruction);
 
         // serialize
-        string json = JsonSerializer.Serialize(requestBody);    
+        string json = JsonSerializer.Serialize(requestBody);
         StringContent content = new(json, Encoding.UTF8, "application/json");
 
         var response = await _httpClient.PostAsync(_endpoint, content);
@@ -104,10 +109,16 @@ public class FreeAITherapist
         return result?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text ?? "";
     }
 
-    public void AddToContentHistory(string content, GeminiAPIRole role) {
+    public void AddToContentHistory(string content, GeminiAPIRole role)
+    {
         GeminiAPIContent newContent = new(new(), role);
         newContent.AddPart(content);
-        
-        _contentHistory.Add(newContent);         
+
+        _contentHistory.Add(newContent);
+    }
+
+    public void AddToSystemPrompt(string content)
+    {
+        _systemInstruction.AddPart(content);
     }
 }

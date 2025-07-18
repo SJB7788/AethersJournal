@@ -19,5 +19,6 @@ window.ChatBox = {
         // Remove chatboxDiv inner text
         const input = document.getElementById("chatbox-input");
         input.value = "";
+        input.focus();
     }
 }
