@@ -103,4 +103,11 @@ public class FreeAITherapist
 
         return result?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text ?? "";
     }
+
+    public void AddToContentHistory(string content, GeminiAPIRole role) {
+        GeminiAPIContent newContent = new(new(), role);
+        newContent.AddPart(content);
+        
+        _contentHistory.Add(newContent);         
+    }
 }

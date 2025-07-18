@@ -4,7 +4,8 @@
     <div class="main-header">
         <input @ref="_titleInput" @oninput="HandleTitleInput" type="text" name="title" id="main-title" placeholder="Title">
 
-        <div class="text-controller">
+            @* maybe in the future *@
+        @* <div class="text-controller">
             <div class="open-controller">
                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#fff">
                     <path
@@ -21,7 +22,7 @@
                 <div onclick="TextEditor.test(event)" class="set-color" data-attribute="color">
                 </div>
             </div>
-        </div>
+        </div> *@
     </div>
 
     <textarea @ref="_editorDiv" @oninput="HandleContentInput" @onpaste="HandleContentInput" name="textEditor" id="main-text-content"></textarea>
