@@ -13,7 +13,7 @@
         <div class="ai-message">Enter any thoughts here and I will respond!</div>
     </div>
     <div id="chatbox-input-container">
-        <input id="chatbox-input" type="text" @bind-value="Message">
+        <input id="chatbox-input" type="text" @bind-value="Message" @onkeydown="Enter">
         <div id="chatbox-send" data-target="chatbox-input" @onclick="SendMessage"></div>
     </div>
 </div>
@@ -42,7 +42,8 @@
             foreach (var message in messages)
             {
                 await AddChatBubble(message.Content, message.Role == ChatProfile.User);
-                AITherapist.AddToContentHistory(message.Content, message.Role == ChatProfile.User ? GeminiAPIRole.user : GeminiAPIRole.model);
+                AITherapist.AddToContentHistory(message.Content, message.Role == ChatProfile.User ? GeminiAPIRole.user :
+                GeminiAPIRole.model);
             }
         }
 
@@ -63,11 +64,22 @@
 
             await JournalService.AddConversationMessage(this._journalId, response, ChatProfile.AI);
             await AddChatBubble(response, isUser: false);
+            
+            // reset message
+            Message = "";
         }
         catch
         {
             Console.WriteLine("Error: Something went wrong. Please try again.");
             await AddChatBubble("I'm having trouble responding. Try again later.", isUser: false);
+        }
+    }
+
+    protected async Task Enter(KeyboardEventArgs e)
+    {
+        if (e.Code == "Enter" || e.Code == "NumpadEnter")
+        {
+            await SendMessage();
         }
     }
 
