@@ -1,15 +1,14 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-public class JournalContext : DbContext
+public class JournalContext : IdentityDbContext<User>
 {
     public JournalContext(DbContextOptions<JournalContext> options)
         : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<User>()
-            .HasIndex(u => u.Username)
-            .IsUnique();
+        base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<JournalEntry>()
             .HasOne(j => j.User)
@@ -39,8 +38,6 @@ public class JournalContext : DbContext
             .Property(m => m.Role)
             .HasConversion<string>();
     }
-
-    public DbSet<User> Users => Set<User>();
     public DbSet<JournalEntry> JournalEntries => Set<JournalEntry>();
     public DbSet<Conversation> Conversations => Set<Conversation>();
     public DbSet<ConversationMessage> ConversationMessages => Set<ConversationMessage>();

@@ -51,7 +51,7 @@
     protected override async Task OnParametersSetAsync()
     {
         this._selectedDate = GetQueryDate();
-        JournalEntry? entry = await JournalService.GetEntryForUser(1, this._selectedDate);
+        JournalEntry? entry = await JournalService.GetEntryForUser("1", this._selectedDate);
         if (entry != null)
         {
             this._journalContent = entry.Content;
@@ -119,9 +119,9 @@
     protected async Task SaveJournal()
     {
         await ShowSavingMessage("Saving...");
-        JournalEntry entry = await JournalService.SaveOrUpdateAndSummarizeAsync(1, this._journalTitle, this._journalContent, this._selectedDate);
+        JournalEntry entry = await JournalService.SaveOrUpdateAndSummarizeAsync("1", this._journalTitle, this._journalContent, this._selectedDate);
         await ShowSavingMessage("Saved!", 2000);
-        await JournalService.CreateConversation(1, entry.Id);
+        await JournalService.CreateConversation("1", entry.Id);
 
         if (this._journalId != entry.Id)
         {

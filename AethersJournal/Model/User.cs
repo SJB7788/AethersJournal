@@ -1,7 +1,7 @@
-public class User
+using Microsoft.AspNetCore.Identity;
+
+public class User : IdentityUser
 {
-    public int Id { get; set; }
-    public string Username { get; set; } = string.Empty;
     public List<JournalEntry> JournalEntries { get; set; } = new();
     public List<Conversation> Conversations { get; set; } = new();
 }

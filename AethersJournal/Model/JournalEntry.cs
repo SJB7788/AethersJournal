@@ -1,7 +1,7 @@
 public class JournalEntry
 {
     public int Id { get; set; }
-    public int UserId { get; set; } // Foreign Key
+    public string UserId { get; set; } = string.Empty; // Foreign Key
     public int? ConversationId { get; set; } // Foreign Key
     public DateTime Date { get; set; }
     public string Title { get; set; } = string.Empty;

@@ -1,4 +1,3 @@
-using AethersJournal.Migrations;
 using Microsoft.EntityFrameworkCore;
 
 public class JournalService
@@ -17,7 +16,7 @@ public class JournalService
     /// </summary>
     /// <param name="userId">The ID of the user to get the entry for</param>
     /// <returns>The journal entry for the current day for the user, or null if no entry exists</returns>
-    public async Task<JournalEntry?> GetTodaysEntryForUser(int userId)
+    public async Task<JournalEntry?> GetTodaysEntryForUser(string userId)
     {
         DateTime today = DateTime.UtcNow.Date;
         return await _context.JournalEntries.FirstOrDefaultAsync(journal =>
@@ -31,7 +30,7 @@ public class JournalService
     /// <param name="userId">The ID of the user to get the entry for</param>
     /// <param name="date">The date to get the entry for</param>
     /// <returns>The journal entry for the specified date for the user, or null if no entry exists</returns>
-    public async Task<JournalEntry?> GetEntryForUser(int userId, DateTime? date)
+    public async Task<JournalEntry?> GetEntryForUser(string userId, DateTime? date)
     {
         return await _context.JournalEntries.FirstOrDefaultAsync(journal =>
             journal.UserId == userId &&
@@ -45,9 +44,9 @@ public class JournalService
     /// <param name="userId">The ID of the user to save the entry for</param>
     /// <param name="journalEntry">The content of the journal entry</param>
     /// <param name="dateTime">The date and time of the journal entry</param>
-    public async Task<(JournalEntry entry, string? originalContent)> SaveOrUpdateJournal(int userId, string journalTitle, string journalEntry, DateTime dateTime)
+    public async Task<(JournalEntry entry, string? originalContent)> SaveOrUpdateJournal(string userId, string journalTitle, string journalEntry, DateTime dateTime)
     {
-        JournalEntry? entry = await _context.JournalEntries.FirstOrDefaultAsync(j => j.UserId == userId && j.Date.Date == dateTime);
+        JournalEntry? entry = await _context.JournalEntries.FirstOrDefaultAsync(j => j.UserId.Equals(userId) && j.Date.Date == dateTime);
 
         string? originalContent = null;
 
@@ -120,7 +119,7 @@ public class JournalService
         Console.WriteLine("Info: Summary Saved!");
     }
 
-    public async Task<JournalEntry> SaveOrUpdateAndSummarizeAsync(int userId, string title, string content, DateTime date)
+    public async Task<JournalEntry> SaveOrUpdateAndSummarizeAsync(string userId, string title, string content, DateTime date)
     {
         var (journal, originalContent) = await SaveOrUpdateJournal(userId, title, content, date);
         await AddSummaryToJournal(journal, originalContent);
@@ -128,14 +127,14 @@ public class JournalService
         return journal;
     }
 
-    public async Task<bool> ConversationExists(int userId, int journalId) {
-        var journalExists = await _context.Conversations.FirstOrDefaultAsync(c => c.UserId == userId && c.JournalId == journalId);
+    public async Task<bool> ConversationExists(string userId, int journalId) {
+        var journalExists = await _context.Conversations.FirstOrDefaultAsync(c => c.UserId.Equals(userId) && c.JournalId == journalId);
 
         return !(journalExists == null);
     }
 
     // create conversation and return conversation id
-    public async Task<int> CreateConversation(int userId, int journalId)
+    public async Task<int> CreateConversation(string userId, int journalId)
     {
         if (await ConversationExists(userId, journalId)) {
             return -1;
@@ -196,7 +195,7 @@ public class JournalService
     // get journalID based on UserID and Date
     public async Task<JournalEntry?> GetJournalEntryFromUserIdAndDate(int userId, DateTime date)
     {
-        JournalEntry? entry = await _context.JournalEntries.FirstOrDefaultAsync(j => j.UserId == userId && j.Date == date);
+        JournalEntry? entry = await _context.JournalEntries.FirstOrDefaultAsync(j => j.UserId.Equals(userId) && j.Date == date);
         return entry;
     }
 }

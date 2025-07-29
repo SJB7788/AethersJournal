@@ -1,6 +1,6 @@
 public class Conversation {
     public int Id { get; set; }
-    public int UserId { get; set; } // Foreign Key
+    public string UserId { get; set; } = string.Empty; // Foreign Key
     public int JournalId {get; set; } // Foreign Key
     public DateTime StartedAt { get; set; }
     public User User { get; set; } = default!;
