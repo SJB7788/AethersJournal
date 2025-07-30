@@ -1,0 +1,24 @@
+@page "/login"
+@rendermode InteractiveServer
+@layout EmptyLayout
+
+<div class="login">
+    <div class="login__form">
+        <div class="login__input-group">
+            <label for="email-input" class="login__label">Email</label>
+            <input type="text" id="email-input" class="login__input login__input--email">
+
+            <div class="login__password-section">
+                <label for="password-input" class="login__label">Password</label>
+                <p class="login__forgot-link">Forgot password?</p>
+            </div>
+            <input type="password" id="password-input" class="login__input login__input--password">
+        </div>
+        <div class="login__actions">
+            <button class="login__button login__button--primary">
+                Sign in
+            </button>
+            <p class="login__signup-link">Create an account</p>
+        </div>
+    </div>
+</div>

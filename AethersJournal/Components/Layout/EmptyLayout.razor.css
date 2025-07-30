@@ -1,0 +1,67 @@
+.page {
+    background-color: var(--main-bg-color);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+}
+
+.page__header {
+    padding: 6rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.page__title {
+    font-family: var(--title-font-family);
+    font-style: italic;
+    font-size: clamp(2.5rem, 8vw, 5.5rem);
+    font-weight: 500;
+    letter-spacing: -4px;
+    color: var(--title-color);
+}
+
+.page__subtitle {
+    font-family: var(--desc-font-family);
+    color: var(--title-fainted-muted-color);
+}
+
+.page__decorations {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.page__leaf {
+    position: absolute;
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 30rem;
+    height: 5rem;
+}
+
+.page__leaf-one {
+    background-image: url('/assets/leafs/leaf_1.webp');
+    width: 30rem;
+    bottom: 50px;
+    rotate: -120deg;
+}
+
+
+.page__leaf-two {
+    background-image: url('/assets/leafs/leaf_2.webp');
+    top: 8rem;
+    left: -10rem;
+    rotate: 120deg;
+}
+
+.page__leaf-three {
+    background-image: url('/assets/leafs/leaf_3.webp');
+    top: 50%;
+    transform: translateY(-50%);
+    right: -5rem;
+    rotate: 50deg;
+}
