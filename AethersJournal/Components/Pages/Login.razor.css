@@ -1,0 +1,88 @@
+p {
+    margin: 0;
+}
+
+.login {
+    width: 90%;
+    position: relative;
+    max-width: 500px;
+    z-index: 1;
+}
+
+.login__form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    gap: 1rem;
+}
+
+.login__input-group {
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.login__email-group, .login__password-group {
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+}
+
+.login__password-header-group {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.login__label {
+    font-family: var(--desc-font-family);
+    font-size: 1em;
+    color: var(--title-color);
+}
+
+.login__forgot-link, .login__signup-link {
+    font-family: var(--desc-font-family);
+    font-size: 0.8em;
+    color: var(--title-color);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.login__input {
+    width: 100%;
+    max-width: 400px;
+    padding: 0.2em 0.3em;
+    position: relative;
+    font-family: var(--desc-font-family);
+    font-size: 0.9em;
+    border: 2px solid var(--title-fainted-muted-color);
+    border-radius: 5px;
+}
+
+.login__input:focus {
+    border: 2px solid var(--title-color);
+    outline: none;
+}
+
+.login__actions {
+    width: 80%;
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    align-items: center;
+}
+
+.login__button {
+    border-radius: 5px;
+    padding: 0.5rem 0.7rem;
+    border: none;
+    background-color: var(--title-color);
+    color: white;
+    font-size: 0.9em;
+}
