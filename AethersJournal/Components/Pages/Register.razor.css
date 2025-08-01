@@ -1,0 +1,115 @@
+p {
+  margin: 0;
+}
+
+.register {
+  width: 90%;
+  position: relative;
+  max-width: 500px;
+  z-index: 1;
+}
+
+.register__form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  gap: 1rem;
+}
+
+.register__input-group {
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.register__inner-input-group {
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+}
+
+.register__password-header-group {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.register__label {
+  font-family: var(--desc-font-family);
+  font-size: 1em;
+  color: var(--title-color);
+}
+
+.register__input {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.2em 0.3em;
+  position: relative;
+  font-family: var(--desc-font-family);
+  font-size: 0.9em;
+  border: 2px solid var(--title-fainted-muted-color);
+  border-radius: 5px;
+}
+
+.register__input:focus {
+  border: 2px solid var(--title-color);
+  outline: none;
+}
+
+.register__actions-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.register__actions {
+  width: 80%;
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: center;
+}
+
+.register__button {
+  border-radius: 5px;
+  padding: 0.5rem 0.7rem;
+  border: none;
+  background-color: var(--title-color);
+  color: white;
+  font-size: 0.9em;
+}
+
+.register__login-subtitle {
+  font-family: var(--desc-font-family);
+  font-size: 0.9em;
+  color: var(--title-color);
+}
+
+.register__login-link {
+  color: var(--title-color);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.register__error {
+    width: 90%;
+    padding: 1rem 1rem;
+    background-color: white;
+    border: 1px solid var(--title-color);
+    border-radius: 5px;
+}
+
+.regstier__error-message {
+  font-family: var(--desc-font-family);
+  font-size: 0.9em;
+  font-weight: 500;
+  color: var(--title-color);
+}

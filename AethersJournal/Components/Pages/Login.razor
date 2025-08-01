@@ -2,6 +2,10 @@
 @rendermode InteractiveServer
 @layout EmptyLayout
 
+@inject UserManager<User> UserManager
+@inject SignInManager<User> SignInManager
+@inject NavigationManager Navigation
+
 <div class="login">
     <div class="login__form">
         <div class="login__input-group">
@@ -22,7 +26,11 @@
             <button class="login__button login__button--primary">
                 Sign in
             </button>
-            <a href="signup" class="login__signup-link">Create an account</a>
+            <a href="/register" class="login__signup-link">Create an account</a>
         </div>
     </div>
 </div>
+
+@code {
+
+}

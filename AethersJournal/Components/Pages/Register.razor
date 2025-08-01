@@ -1,0 +1,89 @@
+@page "/register"
+@rendermode InteractiveServer
+@layout EmptyLayout
+
+@inject UserManager<User> UserManager
+@inject SignInManager<User> SignInManager
+@inject NavigationManager Navigation
+
+<div class="register">
+    <div class="register__form">
+        <div class="register__input-group">
+            @* <div class="register__name-group register__inner-input-group">
+                <label for="name-input" class="register__label">Username</label>
+                <input type="text" id="name-input" class="register__input register__input--name">
+            </div> *@
+
+            <div class="register__email-group register__inner-input-group">
+                <label for="email-input" class="register__label">Email</label>
+                <input @bind-value="registerModel.Email" type="text" id="email-input"
+                    class="register__input register__input--email">
+            </div>
+
+            <div class="register__password-group register__inner-input-group">
+                <label for="password-input" class="register__label">Password</label>
+                <input @bind-value="registerModel.Password" type="password" id="password-input"
+                    class="register__input register__input--password">
+
+
+            </div>
+            <div class="register__reenter-password-group register__inner-input-group">
+                <label for="password-reenter-input" class="register__label">Re-enter password</label>
+                <input @bind-value="registerModel.ConfirmPassword" type="password" id="password-reenter-input"
+                    class="register__input register__input--reenter-password">
+            </div>
+        </div>
+
+        <div class="register__actions-group">
+            <div class="register__actions">
+                <button @onclick="HandleRegister" class="register__button register__button--primary">
+                    Sign up
+                </button>
+                <p class="register__login-subtitle">Already have an account? <a href="/login"
+                        class="register__login-link">Log in</a>
+                </p>
+            </div>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="register__error">
+                    <p class="regstier__error-message">@errorMessage</p>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+
+@code {
+    private RegisterModel registerModel = new();
+    private string? errorMessage;
+
+    private async Task HandleRegister()
+    {
+        if (registerModel.Password != registerModel.ConfirmPassword)
+        {
+            errorMessage = "Passwords do not match!";
+            return;
+        }
+
+        var user = new User { UserName = registerModel.Email, Email = registerModel.Email };
+        var result = await UserManager.CreateAsync(user, registerModel.Password);
+
+        if (result.Succeeded)
+        {
+            Navigation.NavigateTo("/login");
+        }
+        else
+        {
+            errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+        }
+    }
+
+    public class RegisterModel
+    {
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+        public string ConfirmPassword { get; set; } = "";
+    }
+}
