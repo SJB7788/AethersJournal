@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddControllers();
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 builder.Services.AddDbContext<JournalContext>(options =>
@@ -20,16 +22,21 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
+builder.Services.AddHttpClient("AethersJournal", client =>
+{
+    client.BaseAddress = new Uri("http://localhost:5249/"); 
+});
+
 builder.Services.AddSingleton<HttpClient>();
 builder.Services.AddScoped<JournalService>();
 builder.Services.AddScoped<JournalStateService>();
-
 // may change to scoped later
 builder.Services.AddSingleton<FreeAITherapist>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
 
 var app = builder.Build();
 
@@ -43,13 +50,15 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-app.Run();
+app.MapControllers();
 
-app.UseAuthentication();
-app.UseAuthorization();
+app.Run();

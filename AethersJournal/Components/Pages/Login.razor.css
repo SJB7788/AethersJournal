@@ -70,6 +70,14 @@ p {
     outline: none;
 }
 
+.login__actions-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    align-items: center;
+}
+
 .login__actions {
     width: 80%;
     display: flex;
@@ -85,4 +93,19 @@ p {
     background-color: var(--title-color);
     color: white;
     font-size: 0.9em;
+}
+
+.login__error {
+    width: 90%;
+    padding: 1rem 1rem;
+    background-color: white;
+    border: 1px solid var(--title-color);
+    border-radius: 5px;
+}
+
+.login__error-message {
+  font-family: var(--desc-font-family);
+  font-size: 0.9em;
+  font-weight: 500;
+  color: var(--title-color);
 }

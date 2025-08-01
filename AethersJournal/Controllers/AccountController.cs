@@ -16,16 +16,34 @@ public class AccountController : ControllerBase
         _signInManager = signInManager;
     }
 
-    [HttpGet("signin")]
-    public async Task<IActionResult> SignIn([FromQuery] string email, [FromQuery] string returnUrl = "/")
+    [HttpPost("signin")]
+    public async Task<IActionResult> SignIn([FromBody] SignInRequest request)
     {
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user == null)
+        if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
         {
-            return RedirectToPage("/Error");
+            return BadRequest("Email and password are required.");
         }
 
-        await _signInManager.SignInAsync(user, isPersistent: false);
-        return Redirect(returnUrl);
+        var user = await _userManager.FindByEmailAsync(request.Email);
+        if (user == null)
+        {
+            return Unauthorized("Invalid credentials.");
+        }
+
+        var result = await _signInManager.PasswordSignInAsync(
+            user, request.Password, isPersistent: false, lockoutOnFailure: false);
+
+        if (result.Succeeded)
+        {
+            return Ok(new { success = true});
+        }
+
+        return Unauthorized("Invalid credentials.");
+    }
+
+    public class SignInRequest
+    {
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
     }
 } 
