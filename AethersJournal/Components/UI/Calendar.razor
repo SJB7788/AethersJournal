@@ -1,0 +1,71 @@
+<div class="calendar">
+    <div class="calendar__header">
+        <h1 class="calendar__header-title">
+            @calendarStartDate.ToString("MMMM yyyy")
+        </h1>
+    </div>
+
+    <div class="calendar__contents">
+        <div class="calendar__contents--day-of-week">
+            @foreach (var day in DayOfWeek)
+            {
+                <div class="calendar__day-name">@day</div>
+            }
+        </div>
+
+        <div class="calendar__contents--grid">
+            @foreach (var cell in CalendarCells)
+            {
+                <div class="day @(cell.IsCurrentMonth ? "day--current" : "day--padding")">
+                    @if (cell.Date != null)
+                    {
+                        <p class="day-desc">@cell.Date.Value.Day</p>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    DateTime calendarStartDate = new DateTime(2025, 8, 1);
+    List<string> DayOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    class CalendarCell
+    {
+        public DateTime? Date { get; set; }
+        public bool IsCurrentMonth { get; set; }
+    }
+
+    List<CalendarCell> CalendarCells => GenerateCalendarCells();
+
+    List<CalendarCell> GenerateCalendarCells()
+    {
+        var cells = new List<CalendarCell>();
+
+        int firstDayIndex = (int)calendarStartDate.DayOfWeek;
+        // didn't know you can do that but converts day of week to a integer value
+
+        for (int i = 0; i < firstDayIndex; i++)
+        {
+            cells.Add(new CalendarCell { Date = null, IsCurrentMonth = false });
+        }
+
+        int daysInMonth = DateTime.DaysInMonth(calendarStartDate.Year, calendarStartDate.Month);
+        for (int i = 1; i <= daysInMonth; i++)
+        {
+            cells.Add(new CalendarCell
+            {
+                Date = new DateTime(calendarStartDate.Year, calendarStartDate.Month, i),
+                IsCurrentMonth = true
+            });
+        }
+
+        while (cells.Count < 42)
+        {
+            cells.Add(new CalendarCell { Date = null, IsCurrentMonth = false });
+        }
+
+        return cells;
+    }
+}
