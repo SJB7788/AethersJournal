@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,11 +32,15 @@ public class AccountController : ControllerBase
         }
 
         var result = await _signInManager.PasswordSignInAsync(
-            user, request.Password, isPersistent: false, lockoutOnFailure: false);
+            user, request.Password, isPersistent: true, lockoutOnFailure: false);
 
         if (result.Succeeded)
         {
-            return Ok(new { success = true});
+            Console.WriteLine("LOGIN SUCCESS");
+            Console.WriteLine($"User: {user.Email}");
+            var principal = await _signInManager.CreateUserPrincipalAsync(user);
+            await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, principal); // optional extra
+            return Ok(new { success = true });
         }
 
         return Unauthorized("Invalid credentials.");
@@ -46,4 +51,4 @@ public class AccountController : ControllerBase
         public string Email { get; set; } = "";
         public string Password { get; set; } = "";
     }
-} 
+}

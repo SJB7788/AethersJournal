@@ -48,10 +48,17 @@ p {
 
 .login__forgot-link, .login__signup-link {
     font-family: var(--desc-font-family);
-    font-size: 0.8em;
     color: var(--title-color);
     text-decoration: underline;
     cursor: pointer;
+}
+
+.login__forgot-link {
+    font-size: 0.8em;
+}
+
+.login__signup-link {
+    font-size: 0.9em;
 }
 
 .login__input {

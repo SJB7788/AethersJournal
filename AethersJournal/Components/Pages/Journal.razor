@@ -1,7 +1,11 @@
 ﻿@page "/journal"
+@attribute [Authorize]
+
 @inject NavigationManager NavManager
 @inject JournalService JournalService
 @inject JournalStateService JournalStateService
+
+@inject AuthenticationStateProvider AuthStateProvider
 
 @rendermode InteractiveServer
 
@@ -47,6 +51,18 @@
     private int _journalId;
     private Chatbox? _chatboxComponent;
     private ElementReference _saveMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        
+        if (user.Identity?.IsAuthenticated ?? false)
+        {
+            var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            Console.WriteLine("ID: " + userId);
+        }
+    }
 
     protected override async Task OnParametersSetAsync()
     {

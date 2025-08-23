@@ -1,12 +1,22 @@
 using AethersJournal.Components;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddRazorPages();
 builder.Services.AddControllers();
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Configure(builder.Configuration.GetSection("Kestrel"));
+});
 
 builder.Services.AddDbContext<JournalContext>(options =>
     options.UseNpgsql(connectionString), ServiceLifetime.Scoped);
@@ -17,26 +27,24 @@ builder.Services.AddIdentity<User, IdentityRole>()
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/Account/Login";
-    options.LogoutPath = "/Account/Logout";
+    options.LoginPath = "/login";
+    options.LogoutPath = "/Logout";
     options.AccessDeniedPath = "/Account/AccessDenied";
+
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
 
-builder.Services.AddHttpClient("AethersJournal", client =>
-{
-    client.BaseAddress = new Uri("http://localhost:5249/"); 
-});
+builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
 
-builder.Services.AddSingleton<HttpClient>();
 builder.Services.AddScoped<JournalService>();
 builder.Services.AddScoped<JournalStateService>();
+
 // may change to scoped later
 builder.Services.AddSingleton<FreeAITherapist>();
 
-// Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
-
+builder.Services.AddSingleton<HttpClient>();
 
 var app = builder.Build();
 
@@ -56,6 +64,8 @@ app.UseAuthorization();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
+
+app.MapRazorPages();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

@@ -43,7 +43,7 @@ namespace AethersJournal.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Conversations");
+                    b.ToTable("Conversations", (string)null);
                 });
 
             modelBuilder.Entity("ConversationMessage", b =>
@@ -72,7 +72,7 @@ namespace AethersJournal.Migrations
 
                     b.HasIndex("ConversationId");
 
-                    b.ToTable("ConversationMessages");
+                    b.ToTable("ConversationMessages", (string)null);
                 });
 
             modelBuilder.Entity("JournalEntry", b =>
@@ -112,7 +112,7 @@ namespace AethersJournal.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("JournalEntries");
+                    b.ToTable("JournalEntries", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
