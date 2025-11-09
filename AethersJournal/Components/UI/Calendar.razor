@@ -1,20 +1,22 @@
+@inject NavigationManager NavManager
+
 <div class="calendar">
     <div class="calendar__header">
         <h1 class="calendar__header-title">
-            @calendarStartDate.ToString("MMMM yyyy")
+            @CalendarStartDate.ToString(format: "MMMM yyyy")
         </h1>
     </div>
 
     <div class="calendar__contents">
         <div class="calendar__contents--day-of-week">
-            @foreach (var day in DayOfWeek)
+            @foreach (string day in DayOfWeek)
             {
                 <div class="calendar__day-name">@day</div>
             }
         </div>
 
         <div class="calendar__contents--grid">
-            @foreach (var cell in CalendarCells)
+            @foreach (CalendarCell cell in CalendarCells)
             {
                 <div class="day @(cell.IsCurrentMonth ? "day--current" : "day--padding")">
                     @if (cell.Date != null)
@@ -28,8 +30,32 @@
 </div>
 
 @code {
-    DateTime calendarStartDate = new DateTime(2025, 8, 1);
+    private int year;
+    private int month;
+    DateTime CalendarStartDate;
     List<string> DayOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    protected override void OnInitialized()
+    {
+        Uri? uri = NavManager.ToAbsoluteUri(NavManager.Uri);
+
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+        // get param and parse to int and create a datetime obj
+        if ((query.TryGetValue("year", out var yearValue)) && query.TryGetValue("month", out var monthValue))
+        {
+            bool yearParseResult = int.TryParse(yearValue, out year);
+            bool monthParseResult = int.TryParse(monthValue, out month);
+
+            if (monthParseResult && yearParseResult)
+            {
+                CalendarStartDate = new DateTime(year: year, month: month, day: 1);
+                return;
+            }
+        }
+
+        CalendarStartDate = DateTime.Today;
+    }
 
     class CalendarCell
     {
@@ -41,29 +67,29 @@
 
     List<CalendarCell> GenerateCalendarCells()
     {
-        var cells = new List<CalendarCell>();
+        List<CalendarCell>? cells = new List<CalendarCell>();
 
-        int firstDayIndex = (int)calendarStartDate.DayOfWeek;
+        int firstDayIndex = (int)CalendarStartDate.DayOfWeek;
         // didn't know you can do that but converts day of week to a integer value
 
         for (int i = 0; i < firstDayIndex; i++)
         {
-            cells.Add(new CalendarCell { Date = null, IsCurrentMonth = false });
+            cells.Add(item: new CalendarCell { Date = null, IsCurrentMonth = false });
         }
 
-        int daysInMonth = DateTime.DaysInMonth(calendarStartDate.Year, calendarStartDate.Month);
+        int daysInMonth = DateTime.DaysInMonth(CalendarStartDate.Year, CalendarStartDate.Month);
         for (int i = 1; i <= daysInMonth; i++)
         {
-            cells.Add(new CalendarCell
+            cells.Add(item: new CalendarCell
             {
-                Date = new DateTime(calendarStartDate.Year, calendarStartDate.Month, i),
+                Date = new DateTime(CalendarStartDate.Year, CalendarStartDate.Month, i),
                 IsCurrentMonth = true
             });
         }
 
         while (cells.Count < 42)
         {
-            cells.Add(new CalendarCell { Date = null, IsCurrentMonth = false });
+            cells.Add(item: new CalendarCell { Date = null, IsCurrentMonth = false });
         }
 
         return cells;
