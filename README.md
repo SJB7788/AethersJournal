@@ -39,12 +39,14 @@ This project focuses on maintainable architecture, clear separation of concerns,
 ### AI Integration
 - Google Gemini API
 
+## Setup
+
 ### Prerequisites
 - .NET SDK (LTS)
 - PostgreSQL (local or hosted)
 - Docker (optional)
 
-### Setup
+### Build application
 ```sh
 git clone https://github.com/SJB7788/AethersJournal.git
 cd AethersJournal
