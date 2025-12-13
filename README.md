@@ -5,17 +5,13 @@ The application is designed to help users write journal entries and receive stru
 
 This project focuses on maintainable architecture, clear separation of concerns, and privacy-aware design. Features such as analytics and encryption are planned for future iterations.
 
----
-
 ## Features
 
 - **Journal entries** with free-form text input
-- **Optional guided prompts**
 - **AI-assisted reflections** (summaries + reflective questions)
+- **Journal Analytics** 
 - **Private by default** (no public sharing features)
 - **Extensible architecture** for future growth
-
----
 
 ## Design Goals
 
@@ -23,45 +19,27 @@ This project focuses on maintainable architecture, clear separation of concerns,
 - Maintain a clear separation between **UI**, **business logic**, and **infrastructure**
 - Use AI to assist reflection, not to provide advice or diagnoses 
 
----
-
 ## Tech Stack
 
 ### Frontend
-
 - Blazor
 - Razor Components
-- CSS-based styling 
+- CSS styling 
 
 ### Backend
-
 - ASP.NET Core
-- REST
-- Built-in dependency injection
-
-### Data
-
 - PostgreSQL
 - Entity Framework Core
 
-### AI Integration
-
-- Pluggable AI service abstraction
-- Centralized prompt construction
-- Reflection generation (summaries and questions)
-
 ### Infrastructure
-
 - Environment-based configuration
 - Docker support
 - Cloud hosting (Azure)
 
----
-
-## Project Structure
+### AI Integration
+- Google Gemini API
 
 ### Prerequisites
-
 - .NET SDK (LTS)
 - PostgreSQL (local or hosted)
 - Docker (optional)
@@ -82,11 +60,10 @@ AI_API_KEY=your_api_key
 DB_CONNECTION_STRING=your_connection_string
 ```
 
-Run Locally
+### Runing the Application
 ```sh
 dotnet run --project src/AethersJournal.csproj
 ```
----
 
 ## Project Structure
 
@@ -120,7 +97,6 @@ Core journaling functionality, initial AI integration and user authentication ar
 Calendar and analytics features are in progress.
 
 ## Limitations
-
 - This application is not a medical or diagnostic tool
 - AI-generated content may be incomplete or inaccurate
 - No emergency or crisis handling features are included
