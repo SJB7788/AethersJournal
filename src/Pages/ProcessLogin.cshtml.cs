@@ -22,14 +22,14 @@ namespace AethersJournal.Pages
             if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(uid)) return Redirect("/login"); 
 
             // find user by id and check if exists
-            var user = await _userManager.FindByIdAsync(uid);
+            User? user = await _userManager.FindByIdAsync(uid);
             if (user == null) return Redirect("/login");
-            Console.WriteLine("Process Login: UserID: " + uid);
+            
+            _logger.Log(LogLevel.Information, "Process Login: UserID: " + uid);
 
             // validate token
-            Console.WriteLine("Process Login: Token: " + token);
-            var isValid = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, "PreLogin", token);
-            Console.WriteLine("Process Login: isValid: " + isValid);
+            _logger.Log(LogLevel.Information, "Process Login: Token: " + token);
+            bool isValid = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, "PreLogin", token);
 
             if (!isValid) return Redirect("/login");
 

@@ -6,7 +6,7 @@ public class FreeAITherapist
 {
     private string _endpoint;
     private HttpClient _httpClient;
-    private GeminiAPIContent _systemInstruction;
+    private GeminiAPISystemContent _systemInstruction;
     private List<GeminiAPIContent> _contentHistory;
 
     public FreeAITherapist(IConfiguration config, HttpClient httpClient)
@@ -41,7 +41,6 @@ public class FreeAITherapist
 
         // serialize
         string json = JsonSerializer.Serialize(requestBody);
-        // Console.WriteLine(json);
         StringContent content = new(json, Encoding.UTF8, "application/json");
 
         // send request
@@ -60,8 +59,6 @@ public class FreeAITherapist
             PropertyNameCaseInsensitive = true
         });
 
-        // Console.WriteLine(result?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text ?? "No content generated.");
-
         // create new AI content 
         GeminiAPIContent newAIContent = new(new(), GeminiAPIRole.model);
         newAIContent.AddPart(result?.Candidates.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text ?? "");
@@ -79,8 +76,8 @@ public class FreeAITherapist
         newContent.AddPart(journal);
 
         // add base prompt
-        GeminiAPIContent systemInstruction = new(new(), GeminiAPIRole.system);
-        systemInstruction.AddPart("This is a journal entry. This summary will be given to a therapist. Summarize this journal entry to be helpful to a therapist, emphasizing on the emotions, things the person wants to accomplish, wishes to do, etc. Do not add any AI statements, just simply summarize.");
+        GeminiAPISystemContent systemInstruction = new(new(), GeminiAPIRole.system);
+        systemInstruction.AddOrEditSystemPrompt("This is a journal entry. This summary will be given to a therapist. Summarize this journal entry to be helpful to a therapist, emphasizing on the emotions, things the person wants to accomplish, wishes to do, etc. Do not add any AI statements, just simply summarize.");
 
         // create request
         GeminiAPIRequest requestBody = new GeminiAPIRequest(new() { newContent }, systemInstruction);
@@ -117,8 +114,15 @@ public class FreeAITherapist
         _contentHistory.Add(newContent);
     }
 
-    public void AddToSystemPrompt(string content)
+    public void ChangeSystemPrompt(string prompt)
     {
-        _systemInstruction.AddPart(content);
+        _systemInstruction.AddOrEditSystemPrompt(prompt);
+        Console.WriteLine(_systemInstruction.ToString());
+    }
+
+    public void AddOrEditJournalSummary(string summary)
+    {
+        _systemInstruction.AddOrEditJournalSummaryPart(summary);
+        Console.WriteLine(_systemInstruction.ToString());
     }
 }

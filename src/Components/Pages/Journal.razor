@@ -4,7 +4,6 @@
 @inject NavigationManager NavManager
 @inject JournalService JournalService
 @inject JournalStateService JournalStateService
-
 @inject AuthenticationStateProvider AuthStateProvider
 
 @rendermode InteractiveServer
@@ -49,25 +48,34 @@
     private string _journalContent = String.Empty;
     private string _journalSummary = String.Empty;
     private int _journalId;
+    private ClaimsPrincipal? _user;
+    private string _userId = String.Empty;
     private Chatbox? _chatboxComponent;
     private ElementReference _saveMessage;
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        
-        if (user.Identity?.IsAuthenticated ?? false)
+        _user = authState.User;
+
+        if (_user.Identity?.IsAuthenticated ?? false)
         {
-            var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            Console.WriteLine("ID: " + userId);
+            string? userId = _user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId == null)
+            {
+                NavManager.NavigateTo(uri: "/auth/process-logout", forceLoad: true);
+                return;
+            }
+
+            _userId = userId;
         }
     }
 
     protected override async Task OnParametersSetAsync()
     {
         this._selectedDate = GetQueryDate();
-        JournalEntry? entry = await JournalService.GetEntryForUser("1", this._selectedDate);
+        JournalEntry? entry = await JournalService.GetEntryForUser(this._userId, this._selectedDate);
         if (entry != null)
         {
             this._journalContent = entry.Content;
@@ -81,10 +89,7 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (_chatboxComponent != null && _journalId != 0)
-        {
-            await JournalStateService.SetJournalInfoAsync(_journalId, _journalSummary);
-        }
+        await JournalStateService.SetJournalInfoAsync(_journalId, _journalSummary);
     }
 
     private DateTime GetQueryDate()
@@ -113,7 +118,7 @@
         return date;
     }
 
-    protected void Previous()
+    protected async void Previous()
     {
         this._selectedDate = this._selectedDate.AddDays(-1);
         string formattedDate = this._selectedDate.ToString("yyy-MM-dd");
@@ -123,7 +128,7 @@
         NavManager.Refresh(true);
     }
 
-    protected void Next()
+    protected async void Next()
     {
         this._selectedDate = this._selectedDate.AddDays(1);
         string formattedDate = this._selectedDate.ToString("yyy-MM-dd");
@@ -135,9 +140,11 @@
     protected async Task SaveJournal()
     {
         await ShowSavingMessage("Saving...");
-        JournalEntry entry = await JournalService.SaveOrUpdateAndSummarizeAsync("1", this._journalTitle, this._journalContent, this._selectedDate);
+        JournalEntry entry = await JournalService.SaveOrUpdateAndSummarizeAsync(_userId, this._journalTitle,
+        this._journalContent,
+        this._selectedDate);
         await ShowSavingMessage("Saved!", 2000);
-        await JournalService.CreateConversation("1", entry.Id);
+        await JournalService.CreateConversation(_userId, entry.Id);
 
         if (this._journalId != entry.Id)
         {

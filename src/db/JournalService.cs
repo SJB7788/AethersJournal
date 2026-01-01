@@ -116,6 +116,7 @@ public class JournalService
         entry.Summary = summary;
         await _context.SaveChangesAsync();
 
+        Console.WriteLine(entry.Summary);
         Console.WriteLine("Info: Summary Saved!");
     }
 

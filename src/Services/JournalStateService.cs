@@ -11,7 +11,7 @@ public class JournalStateService
         {
             JournalId = newId;
             JournalSummary = entrySummary;
-
+            Console.WriteLine("This happened");
             if (OnJournalChangedAsync != null)
             {
                 await OnJournalChangedAsync.Invoke(newId, JournalSummary);
