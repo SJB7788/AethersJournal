@@ -37,6 +37,7 @@
 
         Console.WriteLine($"Journal Entry Summary: {journalSummary}");
 
+        AITherapist.ClearContentHistory();
         AITherapist.AddOrEditJournalSummary(journalSummary);
 
         List<ConversationMessage>? messages = await JournalService.GetAllConversationMessage(journalId);

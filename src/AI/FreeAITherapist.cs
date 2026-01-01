@@ -37,7 +37,7 @@ public class FreeAITherapist
 
         // create API Request with the content history
         GeminiAPIRequest requestBody = new GeminiAPIRequest(_contentHistory, _systemInstruction);
-        // Console.WriteLine(requestBody.ToString());
+        Console.WriteLine(requestBody.ToString());
 
         // serialize
         string json = JsonSerializer.Serialize(requestBody);
@@ -112,6 +112,11 @@ public class FreeAITherapist
         newContent.AddPart(content);
 
         _contentHistory.Add(newContent);
+    }
+
+    public void ClearContentHistory()
+    {
+        _contentHistory.Clear();
     }
 
     public void ChangeSystemPrompt(string prompt)
