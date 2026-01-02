@@ -10,7 +10,7 @@ services:
     environment:
       POSTGRES_USER: aetheruser
       POSTGRES_PASSWORD: aetherpassword
-      POSTGRES_DB: aetherjournaldb
+      POSTGRES_DB: aethersjournaldb
     volumes:
       - postgres_data:/var/lib/postgresql/data
       
