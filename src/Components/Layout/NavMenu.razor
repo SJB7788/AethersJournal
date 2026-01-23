@@ -1,5 +1,7 @@
-﻿@inject SignInManager<User> _signinManager
+﻿@rendermode InteractiveServer
+@inject SignInManager<User> _signinManager
 @inject UserManager<User> _userManager
+@inject NavigationManager NavManager
 
 <div class="top-navbar">
     <div class="top-nav-item">
@@ -38,7 +40,8 @@
 </div>
 
 @code {
-    public void OnLogout() {
-        Console.WriteLine("A");
+    private void OnLogout() {
+        Console.WriteLine("Home: Logout");
+        NavManager.NavigateTo("/auth/process-logout", forceLoad: true);
     }
 }

@@ -7,11 +7,5 @@
 
 <h1>Hello, world!</h1>
 
-<button @onclick="LogoutTest">Logout</button>
-
 @code {
-    private void LogoutTest() {
-        Console.WriteLine("Home: Logout");
-        NavManager.NavigateTo("/auth/process-logout", forceLoad: true);
-    }
 }
