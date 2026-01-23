@@ -30,15 +30,15 @@
         </div>
 
         <div class="nav-item px-3" @onclick="OnLogout">
-            <button class="nav-link" @onclick="OnLogout">
-                <span class="bi bi-list-journal-nav-menu" aria-hidden="true"></span> Journal
+            <button class="nav-link">
+                <span class="bi bi-list-journal-nav-menu" aria-hidden="true"></span> Logout
             </button>
         </div>
     </nav>
 </div>
 
 @code {
-    private void OnLogout() {
+    public void OnLogout() {
         Console.WriteLine("A");
     }
 }

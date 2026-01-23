@@ -1,4 +1,5 @@
 @inject NavigationManager NavManager
+@rendermode InteractiveServer
 
 <div class="calendar">
     <div class="calendar__header">
@@ -16,12 +17,16 @@
         </div>
 
         <div class="calendar__contents--grid">
-            @foreach (CalendarCell cell in CalendarCells)
+            @for (int i = 0; i < CalendarCells.Count; i++)
             {
-                <div class="day @(cell.IsCurrentMonth ? "day--current" : "day--padding")">
-                    @if (cell.Date != null)
+                CalendarCell? day = CalendarCells[i];
+                string dayClass = day != null ? "day--current" : "day--padding";
+                int dayValue = day != null && day.Date != null ? day.Date.Value.Day : 0;
+
+                <div @onclick=@(e => DirectToJournal(day)) class="day @dayClass" value="@(dayValue > 0 ? dayValue : "")">
+                    @if (day != null && day.Date != null)
                     {
-                        <p class="day-desc">@cell.Date.Value.Day</p>
+                        <p class="day-desc">@day.Date.Value.Day</p>
                     }
                 </div>
             }
@@ -54,7 +59,16 @@
             }
         }
 
+
         CalendarStartDate = DateTime.Today;
+    }
+
+    void DirectToJournal(CalendarCell? cell) {
+        if (cell == null || cell.Date == null) return;
+
+        DateTime date = (DateTime)cell.Date ;
+        string dateString = date.ToString("yyy-MM-dd");
+        NavManager.NavigateTo($"/journal?date={dateString}");
     }
 
     class CalendarCell
