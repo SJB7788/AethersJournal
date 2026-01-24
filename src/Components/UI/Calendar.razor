@@ -1,6 +1,8 @@
 @inject NavigationManager NavManager
 @rendermode InteractiveServer
 
+@inject JournalService JournalService
+
 <div class="calendar">
     <div class="calendar__header">
         <h1 class="calendar__header-title">
@@ -35,13 +37,22 @@
 </div>
 
 @code {
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthState { get; set; } = default!;
+    private ClaimsPrincipal? _user;
+    private string? _userId;
+
     private int year;
     private int month;
     DateTime CalendarStartDate;
     List<string> DayOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        AuthenticationState? authState = await AuthState;
+        _user = authState.User;
+        _userId = _user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
         Uri? uri = NavManager.ToAbsoluteUri(NavManager.Uri);
 
         var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
@@ -59,14 +70,14 @@
             }
         }
 
-
         CalendarStartDate = DateTime.Today;
     }
 
-    void DirectToJournal(CalendarCell? cell) {
+    void DirectToJournal(CalendarCell? cell)
+    {
         if (cell == null || cell.Date == null) return;
 
-        DateTime date = (DateTime)cell.Date ;
+        DateTime date = (DateTime)cell.Date;
         string dateString = date.ToString("yyy-MM-dd");
         NavManager.NavigateTo($"/journal?date={dateString}");
     }

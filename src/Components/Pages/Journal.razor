@@ -1,6 +1,10 @@
 ﻿@page "/journal"
 @attribute [Authorize]
-@rendermode InteractiveServer
+
+@* without this, website is static and not responsive *@
+@* what happens (tldr): client sent server an event -> server process event 
+-> send new HTML after event (generally just the part that rerenders) -> client see change -> yay *@
+@rendermode InteractiveServer 
 
 @inject NavigationManager NavManager
 @inject JournalService JournalService
@@ -41,7 +45,8 @@
 
 @code {
     [CascadingParameter]
-    private Task<AuthenticationState> AuthState { get; set; } = default!;
+    private Task<AuthenticationState> AuthState { get; set; } = default!; 
+        @* = default!; exists to ensure the compiler that we will always get AuthState (if not, gives a warning saying it may be null even though *technically* it will not) *@
     private ClaimsPrincipal? _user;
     private string? _userId;
 
