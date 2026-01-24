@@ -1,12 +1,10 @@
 ﻿@page "/journal"
 @attribute [Authorize]
+@rendermode InteractiveServer
 
 @inject NavigationManager NavManager
 @inject JournalService JournalService
 @inject JournalStateService JournalStateService
-@inject AuthenticationStateProvider AuthStateProvider
-
-@rendermode InteractiveServer
 
 <PageTitle>Journal</PageTitle>
 <script defer src="/js/Journal.js"></script>
@@ -41,39 +39,31 @@
     <div @ref="_saveMessage" class="saving-message">Saving...</div>
 </div>
 
-
 @code {
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthState { get; set; } = default!;
+    private ClaimsPrincipal? _user;
+    private string? _userId;
+
     private DateTime _selectedDate;
     private string _journalTitle = String.Empty;
     private string _journalContent = String.Empty;
     private string _journalSummary = String.Empty;
     private int _journalId;
-    private ClaimsPrincipal? _user;
-    private string _userId = String.Empty;
     private Chatbox? _chatboxComponent;
     private ElementReference _saveMessage;
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        AuthenticationState? authState = await AuthState;
         _user = authState.User;
-
-        if (_user.Identity?.IsAuthenticated ?? false)
-        {
-            string? userId = _user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-            if (userId == null)
-            {
-                NavManager.NavigateTo(uri: "/auth/process-logout", forceLoad: true);
-                return;
-            }
-
-            _userId = userId;
-        }
+        _userId = _user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
     }
 
     protected override async Task OnParametersSetAsync()
     {
+        if (this._userId == null) return;
+
         this._selectedDate = GetQueryDate();
         JournalEntry? entry = await JournalService.GetEntryForUser(this._userId, this._selectedDate);
         if (entry != null)

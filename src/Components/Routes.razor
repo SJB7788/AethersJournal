@@ -1,6 +1,24 @@
-﻿<Router AppAssembly="typeof(Program).Assembly">
-    <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
-        <FocusOnNavigate RouteData="routeData" Selector="h1" />
-    </Found>
-</Router>
+﻿@using AethersJournal.Components.Pages
+@* notes: *@
+@* router looks at URL in browser bar and decides which page component to display on the screen *@
+
+@* auth state does not police routes, only broadcasts user info *@
+<CascadingAuthenticationState>
+    <Router AppAssembly="typeof(Program).Assembly">
+
+        @* when a URL is found *@
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+                <NotAuthorized>
+                    <Login />
+                </NotAuthorized>
+            </AuthorizeRouteView>
+            <FocusOnNavigate RouteData="routeData" Selector="h1" />
+        </Found>
+
+        @* URL is not found  *@
+        <NotFound>
+            <p>Page does not exist!</p>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>

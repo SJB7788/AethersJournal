@@ -37,6 +37,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<JournalService>();
 builder.Services.AddScoped<JournalStateService>();
