@@ -13,10 +13,20 @@ builder.Services.AddRazorComponents()
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-builder.WebHost.ConfigureKestrel(options =>
+if (builder.Environment.IsDevelopment())
 {
-    options.Configure(builder.Configuration.GetSection("Kestrel"));
-});
+    builder.WebHost.ConfigureKestrel(options =>
+    {
+        options.Configure(builder.Configuration.GetSection("Kestrel"));
+    });
+}
+else
+{
+    builder.WebHost.ConfigureKestrel(options =>
+    {
+        options.ListenAnyIP(int.Parse(Environment.GetEnvironmentVariable("PORT") ?? "80"));
+    });
+}
 
 builder.Services.AddDbContext<JournalContext>(options =>
     options.UseNpgsql(connectionString), ServiceLifetime.Scoped);
