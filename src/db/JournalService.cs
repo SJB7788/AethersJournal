@@ -1,3 +1,4 @@
+using System.Collections;
 using Microsoft.EntityFrameworkCore;
 
 public class JournalService
@@ -36,6 +37,13 @@ public class JournalService
             journal.UserId == userId &&
             journal.Date == date
         );
+    }
+
+    public async Task<List<JournalEntry>?> GetMonthEntryInfoForUser(string userId, DateTime date)
+    {
+        return _context.JournalEntries.Where(journal =>
+            journal.UserId == userId && journal.Date.Month == date.Month
+        ).ToList();
     }
 
     /// <summary>
