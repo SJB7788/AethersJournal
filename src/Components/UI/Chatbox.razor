@@ -35,8 +35,6 @@
         this._journalId = journalId;
         this._entrySummary = journalSummary;
 
-        Console.WriteLine($"Journal Entry Summary: {journalSummary}");
-
         AITherapist.ClearContentHistory();
         AITherapist.AddOrEditJournalSummary(journalSummary);
 

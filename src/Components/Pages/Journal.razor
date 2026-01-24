@@ -78,8 +78,6 @@
             this._journalSummary = entry.Summary;
             this._journalId = entry.Id;
         }
-
-        Console.WriteLine("Journal Entry: " + _journalContent);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -138,13 +136,10 @@
     protected async Task SaveJournal()
     {
         await ShowSavingMessage("Saving...");
-        JournalEntry entry = await JournalService.SaveOrUpdateAndSummarizeAsync(_userId, this._journalTitle,
+        JournalEntry entry = await JournalService.SaveOrUpdateAndSummarizeAsync(_userId!, this._journalTitle,
         this._journalContent, this._selectedDate);
         await ShowSavingMessage("Saved!", 2000);
-        await JournalService.CreateConversation(_userId, entry.Id);
-
-        Console.WriteLine($"Entry ID: {entry.Id}");
-        Console.WriteLine($"Journal State Service: {JournalStateService.JournalId}");
+        await JournalService.CreateConversation(_userId!, entry.Id);
 
         if (this._journalId != entry.Id || JournalStateService.JournalId != entry.Id)
         {
