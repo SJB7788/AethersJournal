@@ -77,7 +77,7 @@
         _calendarStartDate = DateTime.Today;
 
         // get all entries for this month for the user 
-        var _entryLookup = await JournalService.GetMonthEntryInfoForUser(_userId!, _calendarStartDate);
+        var _entryLookup = JournalService.GetMonthEntryInfoForUser(_userId!, _calendarStartDate);
 
         if (_entryLookup != null) {
             _existingJournalEntries = _entryLookup.ToLookup(e => e.Date.Date).ToDictionary(g => g.Key, g => g.First());
