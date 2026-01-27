@@ -11,11 +11,12 @@ builder.Services.AddControllers();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-string connectionString = Environment.GetEnvironmentVariable("DefaultConnection") ?? throw new InvalidOperationException("Env string 'DefaultConnection' not found.");
-// var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+// check for change in deployment configuration
+string connectionString;
 
 if (builder.Environment.IsDevelopment())
 {
+    connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
     builder.WebHost.ConfigureKestrel(options =>
     {
         options.Configure(builder.Configuration.GetSection("Kestrel"));
@@ -23,6 +24,8 @@ if (builder.Environment.IsDevelopment())
 }
 else
 {
+    Console.WriteLine("Not dev");
+    connectionString = Environment.GetEnvironmentVariable("DefaultConnection") ?? throw new InvalidOperationException("Env string 'DefaultConnection' not found.");
     builder.WebHost.ConfigureKestrel(options =>
     {
         options.ListenAnyIP(int.Parse(Environment.GetEnvironmentVariable("PORT") ?? "80"));
