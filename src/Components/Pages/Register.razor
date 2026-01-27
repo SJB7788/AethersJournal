@@ -6,7 +6,7 @@
 @inject SignInManager<User> SignInManager
 @inject NavigationManager Navigation
 
-<div class="register">
+<div class="register" @onkeypress="OnEnterPress">
     <div class="register__form">
         <div class="register__input-group">
             @* <div class="register__name-group register__inner-input-group">
@@ -77,6 +77,13 @@
         else
         {
             errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+        }
+    }
+
+    private async Task OnEnterPress(KeyboardEventArgs e) {
+        Console.WriteLine("Key press");
+        if (e.Key == "Enter") {
+            await HandleRegister();
         }
     }
 
