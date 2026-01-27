@@ -39,7 +39,7 @@ public class JournalService
         );
     }
 
-    public async Task<List<JournalEntry>?> GetMonthEntryInfoForUser(string userId, DateTime date)
+    public List<JournalEntry>? GetMonthEntryInfoForUser(string userId, DateTime date)
     {
         return _context.JournalEntries.Where(journal =>
             journal.UserId == userId && journal.Date.Month == date.Month
