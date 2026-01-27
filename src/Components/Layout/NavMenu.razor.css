@@ -22,14 +22,14 @@
 }
 
 .top-navbar {
-    display: block;
+  display: block;
 }
 
 .top-nav-item {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 1em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1em;
 }
 
 .navbar-brand img {
@@ -70,7 +70,11 @@
 }
 
 .bi-list-journal-nav-menu {
-    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 -960 960 960" width="16" fill="white"><path d="M200-200h360v-200h200v-360H200v560Zm0 80q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v400L600-120H200Zm80-280v-80h200v80H280Zm0-160v-80h400v80H280Zm-80 360v-560 560Z" /></svg>');
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 -960 960 960" width="16" fill="white"><path d="M200-200h360v-200h200v-360H200v560Zm0 80q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v400L600-120H200Zm80-280v-80h200v80H280Zm0-160v-80h400v80H280Zm-80 360v-560 560Z" /></svg>');
+}
+
+.bi-logout-nav-menu {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 -960 960 960" width="16" fill="white"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"/></svg>');
 }
 
 .nav-item {
@@ -109,8 +113,16 @@
   color: white;
 }
 
+.link-logout {
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+}
+
 .nav-scrollable {
-  display: none;
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .navbar-toggler:checked ~ .nav-scrollable {
@@ -123,8 +135,9 @@
   }
 
   .nav-scrollable {
-    /* Never collapse the sidebar for wide screens */
-    display: block;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow-y: hidden;
   }
 }
