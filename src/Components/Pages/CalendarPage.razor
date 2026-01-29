@@ -1,10 +1,10 @@
 @rendermode InteractiveServer
 @page "/calendar"
 @page "/"
+@using Microsoft.AspNetCore.Mvc
 
 @inject NavigationManager NavManager
 @inject JournalService JournalService
-
 
 <PageTitle>Calendar</PageTitle>
 
@@ -45,11 +45,20 @@
 </div>
 
 @code {
+    @* user stuff *@
     [CascadingParameter]
     private Task<AuthenticationState> _authState { get; set; } = default!;
     private ClaimsPrincipal? _user;
     private string? _userId;
 
+    @* calendar stuff *@
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "year")]
+    public string? Year {get; set;}
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "month")]
+    public string? Month {get; set;}
     private Calendar _calendar = new();
     private Dictionary<DateTime, JournalEntry> _existingJournalEntries = new();
     private List<string> _dayOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -67,14 +76,14 @@
 
         _calendar = new Calendar();
 
-        if ((query.TryGetValue("year", out var yearValue)) && query.TryGetValue("month", out var monthValue))
+        if (Year != null && Month != null)
         {
-            bool yearParseResult = int.TryParse(yearValue, out int year);
-            bool monthParseResult = int.TryParse(monthValue, out int month);
+            bool yearParseResult = int.TryParse(Year, out int yearNum);
+            bool monthParseResult = int.TryParse(Month, out int monthNum);
 
             if (monthParseResult && yearParseResult)
             {
-                _calendar.SetStartDate(new DateTime(year: year, month: month, day: 1));
+                _calendar.SetStartDate(new DateTime(year: yearNum, month: monthNum, day: 1));
             }
         }
         else
@@ -96,6 +105,25 @@
                The g => g.First() chooses the first entry in case there is more than one (which there shouldnt be anyways but safety is never bad)
             *@
         }
+    }
+
+    protected override void OnParametersSet() {
+        if (Year != null || Month != null)
+        {
+            bool yearParseResult = int.TryParse(Year, out int yearNum);
+            bool monthParseResult = int.TryParse(Month, out int monthNum);
+
+            if (monthParseResult && yearParseResult)
+            {
+                _calendar.SetStartDate(new DateTime(year: yearNum, month: monthNum, day: 1));
+            }
+        }
+        else
+        {
+            _calendar.SetStartDate(DateTime.Today);
+        }
+
+        _calendar.GenerateCalendarCells();
     }
 
     void DirectToJournal(CalendarCell? cell)
