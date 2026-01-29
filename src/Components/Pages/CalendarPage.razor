@@ -1,13 +1,109 @@
 @rendermode InteractiveServer
-@page "/calendar" 
+@page "/calendar"
 @page "/"
+
+@inject NavigationManager NavManager
+@inject JournalService JournalService
+
 
 <PageTitle>Calendar</PageTitle>
 
 <div class="calendar">
-    <CalendarComponent />
+    <div class="calendar__header">
+        <h1 class="calendar__header-title">
+            @_calendar.GetCalendarStartDate().ToString(format: "MMMM yyyy")
+        </h1>
+    </div>
+
+    <div class="calendar__contents">
+        <div class="calendar__contents--day-of-week">
+            @foreach (string day in _dayOfWeek)
+            {
+                <div class="calendar__day-name">@day</div>
+            }
+        </div>
+
+        <div class="calendar__contents--grid">
+            @foreach (CalendarCell day in _calendar.GetCalendarCells())
+            {
+                string dayClass = day.Date != null ? "day--current" : "day--padding";
+                int dayValue = day.Date != null ? day.Date.Value.Day : 0;
+
+                <div @onclick=@(e => DirectToJournal(day)) class="day @dayClass" value="@(dayValue > 0 ? dayValue : "")">
+                    @if (day != null && day.Date != null)
+                    {
+                        <p class="day-desc">@day.Date.Value.Day</p>
+                        @if (_existingJournalEntries.TryGetValue(day.Date.Value.Date, out JournalEntry? entry))
+                        {
+                            <p>@entry.Title</p>
+                        }
+                    }
+                </div>
+            }
+        </div>
+    </div>
 </div>
 
 @code {
+    [CascadingParameter]
+    private Task<AuthenticationState> _authState { get; set; } = default!;
+    private ClaimsPrincipal? _user;
+    private string? _userId;
 
+    private Calendar _calendar = new();
+    private Dictionary<DateTime, JournalEntry> _existingJournalEntries = new();
+    private List<string> _dayOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthenticationState? authState = await _authState;
+        _user = authState.User;
+        _userId = _user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        // get param and parse to int and create a datetime obj
+        Uri? uri = NavManager.ToAbsoluteUri(NavManager.Uri);
+
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+        _calendar = new Calendar();
+
+        if ((query.TryGetValue("year", out var yearValue)) && query.TryGetValue("month", out var monthValue))
+        {
+            bool yearParseResult = int.TryParse(yearValue, out int year);
+            bool monthParseResult = int.TryParse(monthValue, out int month);
+
+            if (monthParseResult && yearParseResult)
+            {
+                _calendar.SetStartDate(new DateTime(year: year, month: month, day: 1));
+            }
+        }
+        else
+        {
+            _calendar.SetStartDate(DateTime.Today);
+        }
+
+        _calendar.GenerateCalendarCells();
+
+        // get all entries for this month for the user
+        var _entryLookup = JournalService.GetMonthEntryInfoForUser(_userId!, _calendar.GetCalendarStartDate());
+
+        if (_entryLookup != null)
+        {
+            _existingJournalEntries = _entryLookup.ToLookup(e => e.Date.Date).ToDictionary(g => g.Key, g => g.First());
+            @* .ToLookup() returns an ILookUp which has lists as values (which there is only 1 entry per day so we want dict) 
+               We can go straight to .ToDictionary() without doing .ToLookUp() but we do this IN CASE we have more than 1 entry per day.
+               This prevents program from crashing in that weird case. 
+               The g => g.First() chooses the first entry in case there is more than one (which there shouldnt be anyways but safety is never bad)
+            *@
+        }
+    }
+
+    void DirectToJournal(CalendarCell? cell)
+    {
+        if (cell == null || cell.Date == null) return;
+
+        DateTime date = (DateTime)cell.Date;
+        string dateString = date.ToString("yyy-MM-dd");
+        NavManager.NavigateTo($"/journal?date={dateString}");
+    }
 }
