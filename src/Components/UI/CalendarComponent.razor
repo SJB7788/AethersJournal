@@ -6,7 +6,7 @@
 <div class="calendar">
     <div class="calendar__header">
         <h1 class="calendar__header-title">
-            @_calendarStartDate.ToString(format: "MMMM yyyy")
+            @_calendar.GetCalendarStartDate().ToString(format: "MMMM yyyy")
         </h1>
     </div>
 
@@ -19,22 +19,23 @@
         </div>
 
         <div class="calendar__contents--grid">
-            @for (int i = 0; i < _calendarCells.Count; i++)
+            @foreach (CalendarCell day in _calendar.GetCalendarCells())
             {
-                CalendarCell? day = _calendarCells[i];
-                string dayClass = day != null ? "day--current" : "day--padding";
-                int dayValue = day != null && day.Date != null ? day.Date.Value.Day : 0;
+                string dayClass = day.Date != null ? "day--current" : "day--padding";
+                int dayValue = day.Date != null ? day.Date.Value.Day : 0;
 
                 <div @onclick=@(e => DirectToJournal(day)) class="day @dayClass" value="@(dayValue > 0 ? dayValue : "")">
                     @if (day != null && day.Date != null)
                     {
                         <p class="day-desc">@day.Date.Value.Day</p>
-                        @if (_existingJournalEntries.TryGetValue(day.Date.Value.Date, out JournalEntry? entry)) {
+                        @if (_existingJournalEntries.TryGetValue(day.Date.Value.Date, out JournalEntry? entry))
+                        {
                             <p>@entry.Title</p>
                         }
                     }
                 </div>
             }
+
         </div>
     </div>
 </div>
@@ -45,12 +46,8 @@
     private ClaimsPrincipal? _user;
     private string? _userId;
 
-    private int _year;
-    private int _month;
-    private Calendar _calendar;
-    private DateTime _calendarStartDate;
+    private Calendar _calendar = new();
     private Dictionary<DateTime, JournalEntry> _existingJournalEntries = new();
-    private List<CalendarCell> _calendarCells => GenerateCalendarCells();
     private List<string> _dayOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
     protected override async Task OnInitializedAsync()
@@ -64,25 +61,30 @@
 
         var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
 
+        _calendar = new Calendar();
+
         if ((query.TryGetValue("year", out var yearValue)) && query.TryGetValue("month", out var monthValue))
         {
-            bool yearParseResult = int.TryParse(yearValue, out _year);
-            bool monthParseResult = int.TryParse(monthValue, out _month);
+            bool yearParseResult = int.TryParse(yearValue, out int year);
+            bool monthParseResult = int.TryParse(monthValue, out int month);
 
             if (monthParseResult && yearParseResult)
             {
-                _calendarStartDate = new DateTime(year: _year, month: _month, day: 1);
-                return;
+                _calendar.SetStartDate(new DateTime(year: year, month: month, day: 1));
             }
         }
+        else
+        {
+            _calendar.SetStartDate(DateTime.Today);
+        }
 
-        _calendarStartDate = DateTime.Today;
-        _calendar = new Calendar(_calendarStartDate);
+        _calendar.GenerateCalendarCells();
 
-        // get all entries for this month for the user 
-        var _entryLookup = JournalService.GetMonthEntryInfoForUser(_userId!, _calendarStartDate);
+        // get all entries for this month for the user
+        var _entryLookup = JournalService.GetMonthEntryInfoForUser(_userId!, _calendar.GetCalendarStartDate());
 
-        if (_entryLookup != null) {
+        if (_entryLookup != null)
+        {
             _existingJournalEntries = _entryLookup.ToLookup(e => e.Date.Date).ToDictionary(g => g.Key, g => g.First());
             @* .ToLookup() returns an ILookUp which has lists as values (which there is only 1 entry per day so we want dict) 
                We can go straight to .ToDictionary() without doing .ToLookUp() but we do this IN CASE we have more than 1 entry per day.
@@ -99,36 +101,5 @@
         DateTime date = (DateTime)cell.Date;
         string dateString = date.ToString("yyy-MM-dd");
         NavManager.NavigateTo($"/journal?date={dateString}");
-    }
-
-
-    List<CalendarCell> GenerateCalendarCells()
-    {
-        List<CalendarCell>? cells = new List<CalendarCell>();
-
-        int firstDayIndex = (int)_calendarStartDate.DayOfWeek;
-        // didn't know you can do that but converts day of week to a integer value
-
-        for (int i = 0; i < firstDayIndex - 1; i++)
-        {
-            cells.Add(item: new CalendarCell { Date = null, IsCurrentMonth = false });
-        }
-
-        int daysInMonth = DateTime.DaysInMonth(_calendarStartDate.Year, _calendarStartDate.Month);
-        for (int i = 1; i <= daysInMonth; i++)
-        {
-            cells.Add(item: new CalendarCell
-            {
-                Date = new DateTime(_calendarStartDate.Year, _calendarStartDate.Month, i),
-                IsCurrentMonth = true
-            });
-        }
-
-        while (cells.Count < 42)
-        {
-            cells.Add(item: new CalendarCell { Date = null, IsCurrentMonth = false });
-        }
-
-        return cells;
     }
 }
