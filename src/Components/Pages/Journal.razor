@@ -1,10 +1,10 @@
-﻿@page "/journal"
-@attribute [Authorize]
+﻿@attribute [Authorize]
+@page "/journal"
 
+@rendermode InteractiveServer
 @* without this, website is static and not responsive *@
 @* what happens (tldr): client sent server an event -> server process event 
--> send new HTML after event (generally just the part that rerenders) -> client see change -> yay *@
-@rendermode InteractiveServer 
+-> send new HTML after event (generally just the part that rerenders) -> client see change *@
 
 @inject NavigationManager NavManager
 @inject JournalService JournalService
@@ -36,7 +36,7 @@
 
     <div class="journal-contents">
         <TextEditor @bind-Content="_journalContent" @bind-Title="_journalTitle" @key="_selectedDate" />
-        <Chatbox @ref="_chatboxComponent" /> @* @bind-JournalId="_journalId" *@
+        <Chatbox @bind-Messages="_messages" @bind-Summary="_journalSummary" OnSave="HandleSave" />
     </div>
 
     <div @ref="_saveMessage" class="saving-message">Saving...</div>
@@ -44,17 +44,22 @@
 
 @code {
     [CascadingParameter]
-    private Task<AuthenticationState> AuthState { get; set; } = default!; 
-        @* = default!; exists to ensure the compiler that we will always get AuthState (if not, gives a warning saying it may be null even though *technically* it will not) *@
+    private Task<AuthenticationState> AuthState { get; set; } = default!;
+    @* = default!; exists to ensure the compiler that we will always get AuthState (if not, gives a warning saying it 
+        may be null even though *technically* it will not) *@
     private ClaimsPrincipal? _user;
     private string? _userId;
 
-    private DateTime _selectedDate;
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "date")]
+    public string? QueryDate { get; set; }
+
+    private int _journalId;
     private string _journalTitle = String.Empty;
     private string _journalContent = String.Empty;
     private string _journalSummary = String.Empty;
-    private int _journalId;
-    private Chatbox? _chatboxComponent;
+    private List<ConversationMessage> _messages = new();
+    private DateTime _selectedDate;
     private ElementReference _saveMessage;
 
     protected override async Task OnInitializedAsync()
@@ -66,22 +71,34 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        if (this._userId == null) return;
+        if (_userId == null) return;
 
-        this._selectedDate = GetQueryDate();
-        JournalEntry? entry = await JournalService.GetEntryForUser(this._userId, this._selectedDate);
+        _selectedDate = GetQueryDate();
+        JournalEntry? entry = await JournalService.GetEntryForUser(_userId, _selectedDate);
+
         if (entry != null)
         {
-            this._journalContent = entry.Content;
-            this._journalTitle = entry.Title;
-            this._journalSummary = entry.Summary;
-            this._journalId = entry.Id;
+            _journalContent = entry.Content;
+            _journalTitle = entry.Title;
+            _journalSummary = entry.Summary;
+            _journalId = entry.Id;
+
+            var conversationMessages = await JournalService.GetAllConversationMessage(_journalId);
+
+            if (conversationMessages != null) _messages = conversationMessages;
+        }
+        else
+        {
+            _journalContent = String.Empty;
+            _journalTitle = String.Empty;
+            _journalSummary = String.Empty;
+            _journalId = 0;
         }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (_journalId != 0 && _journalSummary != null)
+        if (!firstRender && _journalId != 0 && _journalSummary != null)
         {
             await JournalStateService.SetJournalInfoAsync(_journalId, _journalSummary);
         }
@@ -89,25 +106,22 @@
 
     private DateTime GetQueryDate()
     {
-        Uri uri = NavManager.ToAbsoluteUri(NavManager.Uri);
-        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
-
         DateTime date;
+        Console.WriteLine("Date: " + QueryDate);
 
-        if (query.TryGetValue("date", out var dateString) &&
-        DateTime.TryParse(dateString, out var parsedDate))
+        if (QueryDate != null && DateTime.TryParse(QueryDate, out DateTime parsedDate))
         {
             date = DateTime.SpecifyKind(parsedDate.Date, DateTimeKind.Utc);
             // check if the date is ahead of current date
-            if (date > DateTime.UtcNow.Date)
+            if (date > DateTime.UtcNow)
             {
-                date = DateTime.UtcNow.Date;
+                date = DateTime.UtcNow;
                 NavManager.NavigateTo("/journal");
             }
         }
         else
         {
-            date = DateTime.UtcNow.Date;
+            date = DateTime.UtcNow;
         }
 
         return date;
@@ -115,32 +129,29 @@
 
     protected void Previous()
     {
-        this._selectedDate = this._selectedDate.AddDays(-1);
-        string formattedDate = this._selectedDate.ToString("yyy-MM-dd");
+        _selectedDate = _selectedDate.AddDays(-1);
+        string formattedDate = _selectedDate.ToString("yyy-MM-dd");
 
         NavManager.NavigateTo($"/journal?date={formattedDate}");
-        // Temporary Solution to TextEditor not rerendering
-        NavManager.Refresh(true);
     }
 
     protected void Next()
     {
-        this._selectedDate = this._selectedDate.AddDays(1);
-        string formattedDate = this._selectedDate.ToString("yyy-MM-dd");
+        _selectedDate = _selectedDate.AddDays(1);
+        string formattedDate = _selectedDate.ToString("yyy-MM-dd");
 
         NavManager.NavigateTo($"/journal?date={formattedDate}");
-        NavManager.Refresh(true);
     }
 
     protected async Task SaveJournal()
     {
         await ShowSavingMessage("Saving...");
-        JournalEntry entry = await JournalService.SaveOrUpdateAndSummarizeAsync(_userId!, this._journalTitle,
-        this._journalContent, this._selectedDate);
+        JournalEntry entry = await JournalService.SaveOrUpdateAndSummarizeAsync(_userId!, _journalTitle,
+        _journalContent, _selectedDate);
         await ShowSavingMessage("Saved!", 2000);
         await JournalService.CreateConversation(_userId!, entry.Id);
 
-        if (this._journalId != entry.Id || JournalStateService.JournalId != entry.Id)
+        if (_journalId != entry.Id || JournalStateService.JournalId != entry.Id)
         {
             await JournalStateService.SetJournalInfoAsync(entry.Id, entry.Summary);
         }

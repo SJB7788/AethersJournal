@@ -21,46 +21,35 @@
 </div>
 
 @code {
+    [Parameter]
+    public List<ConversationMessage> Messages { get; set; } = new();
+    [Parameter]
+    public EventCallback<List<ConversationMessage>> OnHandleSend { get; set; }
+    [Parameter]
+    public string Summary { get; set; } = String.Empty;
+
+
     public string Message = String.Empty;
-    private int _journalId;
-    private string _entrySummary = String.Empty;
-    private ElementReference _chatboxDiv;
     private bool messageIsSending = false;
-    protected override void OnInitialized()
+    private ElementReference _chatboxDiv;
+    protected override async Task OnInitializedAsync()
     {
-        JournalStateService.OnJournalChangedAsync += HandleJournalChange;
-    }
-
-    public async Task HandleJournalChange(int journalId, string journalSummary)
-    {
-        this._journalId = journalId;
-        this._entrySummary = journalSummary;
-
-        AITherapist.ClearContentHistory();
-        AITherapist.AddOrEditJournalSummary(journalSummary);
-
-        List<ConversationMessage>? messages = await JournalService.GetAllConversationMessage(journalId);
-
-        if (messages != null)
+        foreach (var message in Messages)
         {
-            foreach (var message in messages)
-            {
-                await AddChatBubble(message.Content, message.Role == ChatProfile.User);
-                AITherapist.AddToContentHistory(message.Content, message.Role == ChatProfile.User ? GeminiAPIRole.user :
-                GeminiAPIRole.model);
-            }
+            await AddChatBubble(message.Content, message.Role == ChatProfile.User);
+            AITherapist.AddToContentHistory(message.Content, message.Role == ChatProfile.User ? GeminiAPIRole.user :
+            GeminiAPIRole.model);
         }
-
     }
 
     protected async Task SendMessage()
     {
-        if (string.IsNullOrEmpty(Message) || this._journalId == 0) return;
+        if (string.IsNullOrEmpty(this.Message)) return;
 
         // if message is already sending, return to avoid duplicate sends
         if (messageIsSending) return;
 
-        string messageCopy = Message;
+        string messageCopy = this.Message;
         messageIsSending = true;
 
         // reset message
@@ -68,9 +57,9 @@
         try
         {
             // save user message to db and add change to UI
-            await JournalService.AddConversationMessage(this._journalId, messageCopy, ChatProfile.User);
+            AITherapist.AddToContentHistory(messageCopy, GeminiAPIRole.user);
             await AddChatBubble(messageCopy, isUser: true);
-
+            await OnHandleSend.InvokeAsync(Messages);
 
             string response = await AITherapist.Converse(messageCopy);
 
@@ -98,11 +87,6 @@
     protected async Task AddChatBubble(string chatMessage, bool isUser)
     {
         await JS.InvokeVoidAsync("ChatBox.addMessage", _chatboxDiv, chatMessage, isUser);
-    }
-
-    public void Dispose()
-    {
-        JournalStateService.OnJournalChangedAsync -= HandleJournalChange;
     }
 
     [Inject] private IJSRuntime JS { get; set; } = default!;

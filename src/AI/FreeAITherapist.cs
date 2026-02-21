@@ -10,7 +10,7 @@ public class FreeAITherapist
     private List<GeminiAPIContent> _contentHistory;
     private string _apiKey;
 
-    public FreeAITherapist(IConfiguration config, HttpClient httpClient, string apiKey)
+    public FreeAITherapist(IConfiguration config, HttpClient httpClient)
     {
         _httpClient = httpClient;
         _endpoint = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={config["GeminiAPIKey"]}";
@@ -20,7 +20,7 @@ public class FreeAITherapist
         _systemInstruction = new(new(), GeminiAPIRole.system);
         string basePrompt = "You are an Therapist that will engage in supportive, reflective conversations based on journal entries given to you. Your primary goal is to help me (the user) process my thoughts, emotions, and experiences by simulating aspects of a therapeutic conversation.";
         _systemInstruction.AddPart(basePrompt);
-        _apiKey = apiKey;
+        // _apiKey = apiKey;
     }
 
     public async Task<string> Converse(string input)
