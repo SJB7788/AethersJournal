@@ -77,6 +77,7 @@
 
         _selectedDate = GetQueryDate();
         JournalEntry? entry = await JournalService.GetEntryForUser(_userId, _selectedDate);
+            Console.WriteLine("userid: " + _selectedDate);
 
         if (entry != null)
         {
@@ -109,7 +110,6 @@
     private DateTime GetQueryDate()
     {
         DateTime date;
-        Console.WriteLine("Date: " + QueryDate);
 
         if (QueryDate != null && DateTime.TryParse(QueryDate, out DateTime parsedDate))
         {
@@ -126,7 +126,7 @@
             date = DateTime.UtcNow;
         }
 
-        return date;
+        return date.Date;
     }
 
     protected void Previous()
