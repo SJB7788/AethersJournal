@@ -16,19 +16,17 @@
     </div>
     <div id="chatbox-input-container">
         <input id="chatbox-input" type="text" @bind-value="Message" @bind-value:event="oninput">
-        <div id="chatbox-send" data-target="chatbox-input" @onclick="SendMessage"></div>
+            <div id="chatbox-send" data-target="chatbox-input" @onclick="SendMessage"></div>
+        </div>
     </div>
-</div>
 
 @code {
     [Parameter]
     public List<ConversationMessage> Messages { get; set; } = new();
     [Parameter]
-    public EventCallback<List<ConversationMessage>> OnHandleSend { get; set; }
+    public EventCallback<SendMessageEventArgs> OnHandleSend { get; set; }
     [Parameter]
     public string Summary { get; set; } = String.Empty;
-    [Parameter]
-    public int JournalId {get; set;}
 
 
     public string Message = String.Empty;
@@ -58,14 +56,21 @@
         this.Message = "";
         try
         {
-            // save user message to db and add change to UI
+            await OnHandleSend.InvokeAsync(new SendMessageEventArgs()
+            {
+                Message = messageCopy,
+                Profile = ChatProfile.User
+            });
             AITherapist.AddToContentHistory(messageCopy, GeminiAPIRole.user);
             await AddChatBubble(messageCopy, isUser: true);
-            await OnHandleSend.InvokeAsync(Messages);
 
             string response = await AITherapist.Converse(messageCopy);
 
-            await JournalService.AddConversationMessage(this.JournalId, response, ChatProfile.AI);
+            await OnHandleSend.InvokeAsync(new SendMessageEventArgs()
+            {
+                Message = response,
+                Profile = ChatProfile.AI
+            });
             await AddChatBubble(response, isUser: false);
 
         }
