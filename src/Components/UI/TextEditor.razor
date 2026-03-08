@@ -28,8 +28,9 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await InsertEntryAsync(Content, Title);
-        Console.WriteLine("Content:" + Content);
+        if (Content != null && Title != null) {
+            await InsertEntryAsync(Content, Title);
+        }
     }
 
     private async Task HandleContentInput()

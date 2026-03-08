@@ -2,11 +2,13 @@ window.TextEditor = {
   // For cooperation with C#
   // Insert Content
   setContent: function (element, journalContent) {
+    if (element === null) return;
     element.value = journalContent;
   },
 
   // Extract Content
   getContent: function (element) {
+    if (element === null) return;
     return element.value;
   },
 

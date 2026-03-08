@@ -76,6 +76,15 @@
         if (_userId == null) return;
 
         _selectedDate = GetQueryDate();
+
+        if (QueryDate != null &&
+        DateTime.TryParse(QueryDate, out DateTime parsedDate) &&
+        parsedDate.Date > DateTime.UtcNow.Date)
+        {
+            NavManager.NavigateTo("/journal", false);
+            return;
+        }
+
         JournalEntry? entry = await JournalService.GetEntryForUser(_userId, _selectedDate);
         Console.WriteLine("userid: " + _selectedDate);
 
@@ -122,12 +131,6 @@
         if (QueryDate != null && DateTime.TryParse(QueryDate, out DateTime parsedDate))
         {
             date = DateTime.SpecifyKind(parsedDate.Date, DateTimeKind.Utc);
-            // check if the date is ahead of current date
-            if (date > DateTime.UtcNow)
-            {
-                date = DateTime.UtcNow;
-                NavManager.NavigateTo("/journal");
-            }
         }
         else
         {
@@ -142,7 +145,7 @@
         _selectedDate = _selectedDate.AddDays(-1);
         string formattedDate = _selectedDate.ToString("yyy-MM-dd");
 
-        NavManager.NavigateTo($"/journal?date={formattedDate}");
+        NavManager.NavigateTo($"/journal?date={formattedDate}", false);
     }
 
     protected void Next()
@@ -150,7 +153,7 @@
         _selectedDate = _selectedDate.AddDays(1);
         string formattedDate = _selectedDate.ToString("yyy-MM-dd");
 
-        NavManager.NavigateTo($"/journal?date={formattedDate}");
+        NavManager.NavigateTo($"/journal?date={formattedDate}", false);
     }
 
     protected async Task SaveJournal()
