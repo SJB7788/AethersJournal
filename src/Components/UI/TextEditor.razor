@@ -2,13 +2,13 @@
 
 <div class="text-main">
     <div class="main-header">
-        <input @ref="_titleInput" @oninput="HandleTitleInput" type="text" name="title" id="main-title"
-            placeholder="Title">
-    </div>
+        <input @ref="_titleInput" @onchange="HandleTitleInput" type="text" name="title" id="main-title"
+               placeholder="Title">
+        </div>
 
-    <textarea @ref="_editorDiv" @oninput="HandleContentInput" @onpaste="HandleContentInput" name="textEditor"
-        id="main-text-content"></textarea>
-</div>
+        <textarea @ref="_editorDiv" @onchange="HandleContentInput" name="textEditor"
+                  id="main-text-content"></textarea>
+    </div>
 
 @code {
     [Parameter]
@@ -26,26 +26,42 @@
 
     [Inject] private IJSRuntime JS { get; set; } = default!;
 
+    private string? _lastRenderedContent;
+    private string? _lastRenderedTitle;
+    private bool _shouldSyncFromParameters;
+
+    protected override Task OnParametersSetAsync()
+    {
+        if (Content != _lastRenderedContent || Title != _lastRenderedTitle)
+        {
+            _shouldSyncFromParameters = true;
+        }
+
+        return Task.CompletedTask;
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (Content != null && Title != null) {
+        if (_shouldSyncFromParameters)
+        {
+            _shouldSyncFromParameters = false;
+            _lastRenderedContent = Content;
+            _lastRenderedTitle = Title;
+
             await InsertEntryAsync(Content, Title);
         }
     }
 
-    private async Task HandleContentInput()
+    private async Task HandleContentInput(ChangeEventArgs e)
     {
-        var value = await JS.InvokeAsync<string>("TextEditor.getContent", _editorDiv);
-        Content = value;
+        Content = e.Value?.ToString() ?? string.Empty;
 
         await ContentChanged.InvokeAsync(Content);
     }
 
-    private async Task HandleTitleInput()
+    private async Task HandleTitleInput(ChangeEventArgs e)
     {
-        var value = await JS.InvokeAsync<string>("TextEditor.getContent", _titleInput);
-        Title = value;
-
+        Title = e.Value?.ToString() ?? string.Empty;
         await TitleChanged.InvokeAsync(Title);
     }
 
