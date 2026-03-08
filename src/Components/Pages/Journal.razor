@@ -36,7 +36,7 @@
 
     <div class="journal-contents">
         <TextEditor @bind-Content="_journalContent" @bind-Title="_journalTitle" @key="_selectedDate" />
-        <Chatbox @bind-Messages="_messages" @bind-Summary="_journalSummary" OnSave="HandleChatSave" />
+        <Chatbox @bind-Messages="_messages" @bind-Summary="_journalSummary" OnHandleSend="HandleChatSave" />
     </div>
 
     <div @ref="_saveMessage" class="saving-message">Saving...</div>
@@ -159,7 +159,6 @@
         }
     }
 
-    // this is to move the logic for saving chat to DB outside of the chatbox component 
     protected async Task HandleChatSave(SendMessageEventArgs messageArgs) {
         await JournalService.AddConversationMessage(_journalId, messageArgs.Message, messageArgs.Profile);
     }

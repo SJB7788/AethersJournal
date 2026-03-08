@@ -24,10 +24,13 @@
     [Parameter]
     public List<ConversationMessage> Messages { get; set; } = new();
     [Parameter]
-    public EventCallback<SendMessageEventArgs> OnHandleSend { get; set; }
+    public EventCallback<List<ConversationMessage>> MessagesChanged { get; set; }
     [Parameter]
     public string Summary { get; set; } = String.Empty;
-
+    [Parameter]
+    public EventCallback<string> SummaryChanged { get; set; }
+    [Parameter]
+    public EventCallback<SendMessageEventArgs> OnHandleSend { get; set; }
 
     public string Message = String.Empty;
     private bool messageIsSending = false;
