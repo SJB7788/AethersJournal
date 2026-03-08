@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 public class FreeAITherapist
 {
@@ -8,12 +9,13 @@ public class FreeAITherapist
     private HttpClient _httpClient;
     private GeminiAPISystemContent _systemInstruction;
     private List<GeminiAPIContent> _contentHistory;
-    private string _apiKey;
 
-    public FreeAITherapist(IConfiguration config, HttpClient httpClient)
+    public FreeAITherapist(HttpClient httpClient, IOptions<AITherapistConfig> config)
     {
         _httpClient = httpClient;
-        _endpoint = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={config["GeminiAPIKey"]}";
+
+        string apiKey = config.Value.ApiKey;
+        _endpoint = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={apiKey}";
 
         _contentHistory = new();
 

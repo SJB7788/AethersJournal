@@ -17,8 +17,9 @@ string apiKey;
 
 if (builder.Environment.IsDevelopment())
 {
+    Console.WriteLine("Development build");
     connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-    // apiKey = builder.Configuration.GetSection("GeminiAPIKey") ?? throw new InvalidOperationException("Gemini API Key not found.");
+    apiKey = builder.Configuration.GetSection("GeminiAPIKey").Value ?? throw new InvalidOperationException("Gemini API Key not found.");
 
     builder.WebHost.ConfigureKestrel(options =>
     {
@@ -27,14 +28,20 @@ if (builder.Environment.IsDevelopment())
 }
 else
 {
-    Console.WriteLine("Not dev");
-    connectionString = Environment.GetEnvironmentVariable("DefaultConnection") ?? throw new InvalidOperationException("Env string 'DefaultConnection' not found.");
+    Console.WriteLine("Production build");
+    connectionString = Environment.GetEnvironmentVariable("DefaultConnection") ?? throw new InvalidOperationException("Env string 'DefaultConnection' not found.");    
     apiKey = Environment.GetEnvironmentVariable("GeminiAPIKey") ?? throw new InvalidOperationException("Gemini API Key not found.");
+
     builder.WebHost.ConfigureKestrel(options =>
     {
         options.ListenAnyIP(int.Parse(Environment.GetEnvironmentVariable("PORT") ?? "80"));
     });
 }
+
+builder.Services.Configure<AITherapistConfig>(options =>
+{
+    options.ApiKey = apiKey;
+});
 
 builder.Services.AddDbContext<JournalContext>(options =>
     options.UseNpgsql(connectionString), ServiceLifetime.Scoped);
