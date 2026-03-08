@@ -126,12 +126,12 @@ public class FreeAITherapist
     public void ChangeSystemPrompt(string prompt)
     {
         _systemInstruction.AddOrEditSystemPrompt(prompt);
-        Console.WriteLine(_systemInstruction.ToString());
+        Console.WriteLine("New System Prompt: "+ _systemInstruction.ToString());
     }
 
     public void AddOrEditJournalSummary(string summary)
     {
         _systemInstruction.AddOrEditJournalSummaryPart(summary);
-        Console.WriteLine(_systemInstruction.ToString());
+        Console.WriteLine("Journal Summary Added: " + _systemInstruction.ToString());
     }
 }

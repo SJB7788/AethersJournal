@@ -48,10 +48,11 @@
     private ElementReference _chatboxDiv;
     protected override async Task OnParametersSetAsync()
     {
+        Console.WriteLine("Paramter is chaging?");
         AITherapist.ClearContentHistory();
+        AITherapist.AddOrEditJournalSummary(Summary);
         foreach (var message in Messages)
         {
-            Console.WriteLine("Message: " + message.Content);
             AITherapist.AddToContentHistory(message.Content, message.Role == ChatProfile.User ? GeminiAPIRole.user :
             GeminiAPIRole.model);
         }
