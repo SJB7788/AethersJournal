@@ -31,16 +31,16 @@
             </a>
             <a class="navigation" id="navigation-next" @onclick="Next">
                 Next &gt </a>
+            </div>
         </div>
-    </div>
 
-    <div class="journal-contents">
-        <TextEditor @bind-Content="_journalContent" @bind-Title="_journalTitle" @key="_selectedDate" />
-        <Chatbox @bind-Messages="_messages" @bind-Summary="_journalSummary" OnHandleSend="HandleChatSave" />
-    </div>
+        <div class="journal-contents">
+            <TextEditor @bind-Content="_journalContent" @bind-Title="_journalTitle" @key="_selectedDate" />
+            <Chatbox @bind-Messages="_messages" @bind-Summary="_journalSummary" OnHandleSend="HandleChatSave" />
+        </div>
 
-    <div @ref="_saveMessage" class="saving-message">Saving...</div>
-</div>
+        <div @ref="_saveMessage" class="saving-message">Saving...</div>
+    </div>
 
 @code {
     [CascadingParameter]
@@ -77,7 +77,7 @@
 
         _selectedDate = GetQueryDate();
         JournalEntry? entry = await JournalService.GetEntryForUser(_userId, _selectedDate);
-            Console.WriteLine("userid: " + _selectedDate);
+        Console.WriteLine("userid: " + _selectedDate);
 
         if (entry != null)
         {
@@ -88,7 +88,14 @@
 
             var conversationMessages = await JournalService.GetAllConversationMessage(_journalId);
 
-            if (conversationMessages != null) _messages = conversationMessages;
+            if (conversationMessages != null && conversationMessages.Count > 0)
+            {
+                _messages = conversationMessages;
+            }
+            else
+            {
+                _messages.Clear();
+            }
         }
         else
         {
@@ -96,6 +103,7 @@
             _journalTitle = String.Empty;
             _journalSummary = String.Empty;
             _journalId = 0;
+            _messages.Clear();
         }
     }
 
@@ -159,7 +167,8 @@
         }
     }
 
-    protected async Task HandleChatSave(SendMessageEventArgs messageArgs) {
+    protected async Task HandleChatSave(SendMessageEventArgs messageArgs)
+    {
         await JournalService.AddConversationMessage(_journalId, messageArgs.Message, messageArgs.Profile);
     }
 
