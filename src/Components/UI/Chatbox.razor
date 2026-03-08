@@ -27,6 +27,8 @@
     public EventCallback<List<ConversationMessage>> OnHandleSend { get; set; }
     [Parameter]
     public string Summary { get; set; } = String.Empty;
+    [Parameter]
+    public int JournalId {get; set;}
 
 
     public string Message = String.Empty;
@@ -63,7 +65,7 @@
 
             string response = await AITherapist.Converse(messageCopy);
 
-            await JournalService.AddConversationMessage(this._journalId, response, ChatProfile.AI);
+            await JournalService.AddConversationMessage(this.JournalId, response, ChatProfile.AI);
             await AddChatBubble(response, isUser: false);
 
         }
