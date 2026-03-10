@@ -37,10 +37,20 @@
                     string dayClass = day.Date != null ? "day--current" : "day--padding";
                     int dayValue = day.Date != null ? day.Date.Value.Day : 0;
 
-                    <div @onclick=@(e => DirectToJournal(day)) class="day @dayClass" value="@(dayValue > 0 ? dayValue : "")">
+                    <div @onclick=@(e => DirectToJournal(day)) class="day @dayClass">
                         @if (day != null && day.Date != null)
                         {
-                            <p class="day-desc">@day.Date.Value.Day</p>
+                            <div class="day-date">
+                                @if (DateTime.Today == day.Date.Value)
+                                {
+                                    <p class="date-desc date-today">@day.Date.Value.Day</p>
+                                }
+                                else
+                                {
+                                    <p class="date-desc">@day.Date.Value.Day</p>
+
+                                }
+                            </div>
                             @if (_existingJournalEntries.TryGetValue(day.Date.Value.Date, out JournalEntry? entry))
                             {
                                 <div class="day-entry">

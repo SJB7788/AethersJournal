@@ -60,20 +60,35 @@
 }
 
 .day {
+  position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
   border-right: 1px solid #ccc;
   border-bottom: 1px solid #ccc;
 }
 
-.day-desc {
+.day-date {
+  position: relative;
+  width: auto;
+  text-align: center;
+}
+
+.date-desc {
   margin-top: 5px;
+}
+
+.date-today {
+    display: inline-block;
+    border-radius: 50%;
+    width: 24px;
+    text-align: center;
+    background-color: var(--title-color);
+    color: white;
 }
 
 .day-entry {
   cursor: pointer;
-  width: 100%;
+  width: 95%;
   overflow-x: hidden;
   padding: 0.25rem 1rem;
   border-radius: 0.5em;
