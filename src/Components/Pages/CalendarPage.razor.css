@@ -70,3 +70,22 @@
 .day-desc {
   margin-top: 5px;
 }
+
+.day-entry {
+  cursor: pointer;
+  width: 100%;
+  overflow-x: hidden;
+  padding: 0.25rem 1rem;
+  border-radius: 0.5em;
+  display: flex;
+  align-items: center;
+  background-color: var(--navbar-item-bg-color);
+}
+
+.entry-title {
+  font-size: 1em;
+  max-height: 1.5em;
+  overflow-y: hidden;
+
+  margin: 0;
+}

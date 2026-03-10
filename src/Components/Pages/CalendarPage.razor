@@ -43,7 +43,9 @@
                             <p class="day-desc">@day.Date.Value.Day</p>
                             @if (_existingJournalEntries.TryGetValue(day.Date.Value.Date, out JournalEntry? entry))
                             {
-                                <p>@entry.Title</p>
+                                <div class="day-entry">
+                                    <p class="entry-title">@entry.Title</p>
+                                </div>
                             }
                         }
                     </div>
