@@ -13,36 +13,44 @@
         <h1 class="calendar__header-title">
             @_calendar.GetCalendarStartDate().ToString(format: "MMMM yyyy")
         </h1>
-    </div>
+        <div class="calendar__header-controller">
+            <a class="calendar__navigation" id="navigation-prev" @onclick="Previous">
+                &lt Previous
+            </a>
+            <a class="calendar__navigation" id="navigation-next" @onclick="Next">
+                Next &gt </a>
+            </div>
 
-    <div class="calendar__contents">
-        <div class="calendar__contents--day-of-week">
-            @foreach (string day in _dayOfWeek)
-            {
-                <div class="calendar__day-name">@day</div>
-            }
         </div>
 
-        <div class="calendar__contents--grid">
-            @foreach (CalendarCell day in _calendar.GetCalendarCells())
-            {
-                string dayClass = day.Date != null ? "day--current" : "day--padding";
-                int dayValue = day.Date != null ? day.Date.Value.Day : 0;
+        <div class="calendar__contents">
+            <div class="calendar__contents--day-of-week">
+                @foreach (string day in _dayOfWeek)
+                {
+                    <div class="calendar__day-name">@day</div>
+                }
+            </div>
 
-                <div @onclick=@(e => DirectToJournal(day)) class="day @dayClass" value="@(dayValue > 0 ? dayValue : "")">
-                    @if (day != null && day.Date != null)
-                    {
-                        <p class="day-desc">@day.Date.Value.Day</p>
-                        @if (_existingJournalEntries.TryGetValue(day.Date.Value.Date, out JournalEntry? entry))
+            <div class="calendar__contents--grid">
+                @foreach (CalendarCell day in _calendar.GetCalendarCells())
+                {
+                    string dayClass = day.Date != null ? "day--current" : "day--padding";
+                    int dayValue = day.Date != null ? day.Date.Value.Day : 0;
+
+                    <div @onclick=@(e => DirectToJournal(day)) class="day @dayClass" value="@(dayValue > 0 ? dayValue : "")">
+                        @if (day != null && day.Date != null)
                         {
-                            <p>@entry.Title</p>
+                            <p class="day-desc">@day.Date.Value.Day</p>
+                            @if (_existingJournalEntries.TryGetValue(day.Date.Value.Date, out JournalEntry? entry))
+                            {
+                                <p>@entry.Title</p>
+                            }
                         }
-                    }
-                </div>
-            }
+                    </div>
+                }
+            </div>
         </div>
     </div>
-</div>
 
 @code {
     @* user stuff *@
@@ -54,11 +62,11 @@
     @* calendar stuff *@
     [Parameter]
     [SupplyParameterFromQuery(Name = "year")]
-    public string? Year {get; set;}
+    public string? Year { get; set; }
 
     [Parameter]
     [SupplyParameterFromQuery(Name = "month")]
-    public string? Month {get; set;}
+    public string? Month { get; set; }
     private Calendar _calendar = new();
     private Dictionary<DateTime, JournalEntry> _existingJournalEntries = new();
     private List<string> _dayOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -107,7 +115,8 @@
         }
     }
 
-    protected override void OnParametersSet() {
+    protected override void OnParametersSet()
+    {
         if (Year != null || Month != null)
         {
             bool yearParseResult = int.TryParse(Year, out int yearNum);
@@ -133,5 +142,73 @@
         DateTime date = (DateTime)cell.Date;
         string dateString = date.ToString("yyy-MM-dd");
         NavManager.NavigateTo($"/journal?date={dateString}");
+    }
+
+    protected void Previous()
+    {
+        int yearNum;
+        int monthNum;
+
+        if (Year != null && Month != null)
+        {
+            bool yearParseResult = int.TryParse(Year, out yearNum);
+            bool monthParseResult = int.TryParse(Month, out monthNum);
+
+            if (!monthParseResult && !yearParseResult)
+            {
+                Console.WriteLine("Error occurred moving to previous month");
+                return;
+            }
+        }
+        else
+        {
+            yearNum = DateTime.UtcNow.Year;
+            monthNum = DateTime.UtcNow.Month;
+
+        }
+
+        monthNum--;
+
+        if (monthNum <= 0)
+        {
+            yearNum--;
+            monthNum = 12;
+        }
+
+        NavManager.NavigateTo($"/calendar?year={yearNum}&month={monthNum}");
+    }
+
+    protected void Next()
+    {
+        int yearNum;
+        int monthNum;
+
+        if (Year != null && Month != null)
+        {
+            bool yearParseResult = int.TryParse(Year, out yearNum);
+            bool monthParseResult = int.TryParse(Month, out monthNum);
+
+            if (!monthParseResult && !yearParseResult)
+            {
+                Console.WriteLine("Error occurred moving to previous month");
+                return;
+            }
+        }
+        else
+        {
+            yearNum = DateTime.UtcNow.Year;
+            monthNum = DateTime.UtcNow.Month;
+        }
+
+        monthNum = monthNum % 12;
+
+        if (monthNum == 0)
+        {
+            yearNum++;
+        }
+        monthNum++;
+
+        NavManager.NavigateTo($"/calendar?year={yearNum}&month={monthNum}");
+        return;
     }
 }
