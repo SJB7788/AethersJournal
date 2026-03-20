@@ -9,57 +9,58 @@
 <PageTitle>Calendar</PageTitle>
 
 <div class="calendar">
-    <div class="calendar__header">
-        <h1 class="calendar__header-title">
-            @_calendar.GetCalendarStartDate().ToString(format: "MMMM yyyy")
-        </h1>
-        <div class="calendar__header-controller">
-            <a class="calendar__navigation" id="navigation-prev" @onclick="Previous">
-                &lt Previous
-            </a>
-            <a class="calendar__navigation" id="navigation-next" @onclick="Next">
-                Next &gt </a>
+    <div class="calendar__container">
+        <div class="calendar__header">
+            <h1 class="calendar__header-title">
+                @_calendar.GetCalendarStartDate().ToString(format: "MMMM yyyy")
+            </h1>
+            <div class="calendar__header-controller">
+                <a class="calendar__navigation" id="navigation-prev" @onclick="Previous">
+                    &lt Previous
+                </a>
+                <a class="calendar__navigation" id="navigation-next" @onclick="Next">
+                    Next &gt </a>
+                </div>
             </div>
 
-        </div>
+            <div class="calendar__contents">
+                <div class="calendar__contents--day-of-week">
+                    @foreach (string day in _dayOfWeek)
+                    {
+                        <div class="calendar__day-name">@day</div>
+                    }
+                </div>
 
-        <div class="calendar__contents">
-            <div class="calendar__contents--day-of-week">
-                @foreach (string day in _dayOfWeek)
-                {
-                    <div class="calendar__day-name">@day</div>
-                }
-            </div>
+                <div class="calendar__contents--grid">
+                    @foreach (CalendarCell day in _calendar.GetCalendarCells())
+                    {
+                        string dayClass = day.Date != null ? "day--current" : "day--padding";
+                        int dayValue = day.Date != null ? day.Date.Value.Day : 0;
 
-            <div class="calendar__contents--grid">
-                @foreach (CalendarCell day in _calendar.GetCalendarCells())
-                {
-                    string dayClass = day.Date != null ? "day--current" : "day--padding";
-                    int dayValue = day.Date != null ? day.Date.Value.Day : 0;
-
-                    <div @onclick=@(e => DirectToJournal(day)) class="day @dayClass">
-                        @if (day != null && day.Date != null)
-                        {
-                            <div class="day-date">
-                                @if (DateTime.Today == day.Date.Value)
-                                {
-                                    <p class="date-desc date-today">@day.Date.Value.Day</p>
-                                }
-                                else
-                                {
-                                    <p class="date-desc">@day.Date.Value.Day</p>
-
-                                }
-                            </div>
-                            @if (_existingJournalEntries.TryGetValue(day.Date.Value.Date, out JournalEntry? entry))
+                        <div @onclick=@(e => DirectToJournal(day)) class="day @dayClass">
+                            @if (day != null && day.Date != null)
                             {
-                                <div class="day-entry">
-                                    <p class="entry-title">@entry.Title</p>
+                                <div class="day-date">
+                                    @if (DateTime.Today == day.Date.Value)
+                                    {
+                                        <p class="date-desc date-today">@day.Date.Value.Day</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="date-desc">@day.Date.Value.Day</p>
+
+                                    }
                                 </div>
+                                @if (_existingJournalEntries.TryGetValue(day.Date.Value.Date, out JournalEntry? entry))
+                                {
+                                    <div class="day-entry">
+                                        <p class="entry-title">@entry.Title</p>
+                                    </div>
+                                }
                             }
-                        }
-                    </div>
-                }
+                        </div>
+                    }
+                </div>
             </div>
         </div>
     </div>
