@@ -1,0 +1,19 @@
+.page__header {
+    position: sticky;
+    top: 0;
+}
+
+.header__container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.header__items--container {
+    display: flex;
+    flex-direction: row;
+}
+
+.page__title {
+    height: 200vh;
+}
