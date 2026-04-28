@@ -36,8 +36,15 @@
 
         <div class="register__actions-group">
             <div class="register__actions">
-                <button @onclick="HandleRegister" class="register__button register__button--primary">
-                    Sign up
+                <button @onclick="HandleRegister" class="register__button register__button--primary" disabled=@signingIn>
+                    @if (!signingIn)
+                    {
+                        <p>Sign up</p>
+                    }
+                    else
+                    {
+                        <p>Signing up</p>
+                    }
                 </button>
                 <p class="register__login-subtitle">Already have an account? <a href="/login"
                         class="register__login-link">Log in</a>
@@ -58,12 +65,15 @@
 @code {
     private RegisterModel registerModel = new();
     private string? errorMessage;
+    private bool signingIn = false;
 
     private async Task HandleRegister()
     {
+        signingIn = true;
         if (registerModel.Password != registerModel.ConfirmPassword)
         {
             errorMessage = "Passwords do not match!";
+            signingIn = false;
             return;
         }
 
@@ -76,6 +86,7 @@
         }
         else
         {
+            signingIn = false;
             errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
         }
     }

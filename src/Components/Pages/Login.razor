@@ -7,8 +7,8 @@
 @inject NavigationManager _navigationManager
 
 
-<div class="login" @onkeypress="OnEnterPress" >
-    <form class="login__form" >
+<div class="login" @onkeypress="OnEnterPress">
+    <form class="login__form">
         <div class="login__input-group">
             <div class="login__email-group">
                 <label for="email-input" class="login__label">Email</label>
@@ -21,13 +21,21 @@
                     <p class="login__forgot-link">Forgot password?</p>
                 </div>
                 <input @bind="_password" type="password" id="password-input"
-                    class="login__input login__input--password" />
+                       class="login__input login__input--password" />
             </div>
         </div>
         <div class="login__actions-group">
             <div class="login__actions">
-                <button type="button" class="login__button login__button--primary" @onclick="OnLoginClick">
-                    Sign in
+                <button @onclick="OnLoginClick" type="button" class="login__button login__button--primary"
+                        disabled=@_loggingIn>
+                    @if (!_loggingIn)
+                    {
+                        <p>Sign in</p>
+                    }
+                    else
+                    {
+                        <p>Signing in</p>
+                    }
                 </button>
                 <a href="/register" class="login__signup-link">Create an account</a>
             </div>
@@ -46,9 +54,11 @@
     private string _email = string.Empty;
     private string _password = string.Empty;
     private string _errorMessage = string.Empty;
+    private bool _loggingIn = false;
 
     private async Task OnLoginClick()
     {
+        _loggingIn = true;
         _errorMessage = string.Empty;
 
         // check if email or password is empty
@@ -56,6 +66,7 @@
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(_password))
         {
             _errorMessage = "Email and Password is required!";
+            _loggingIn = false;
             return;
         }
 
@@ -64,6 +75,7 @@
         if (user == null)
         {
             _errorMessage = "Invalid email or password.";
+            _loggingIn = false;
             return;
         }
 
@@ -82,10 +94,13 @@
         }
 
         _errorMessage = "Invalid email or password.";
+        _loggingIn = false;
     }
 
-    private async Task OnEnterPress(KeyboardEventArgs e) {
-        if (e.Key == "Enter") {
+    private async Task OnEnterPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
             await OnLoginClick();
         }
     }

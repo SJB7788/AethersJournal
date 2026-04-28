@@ -48,7 +48,6 @@
     private ElementReference _chatboxDiv;
     protected override async Task OnParametersSetAsync()
     {
-        Console.WriteLine("Paramter is chaging?");
         AITherapist.ClearContentHistory();
         AITherapist.AddOrEditJournalSummary(Summary);
         foreach (var message in Messages)
