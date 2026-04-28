@@ -21,7 +21,7 @@
             </div>
             <div class="title-controller">
                 <button class="save" @onclick="SaveJournal">
-                    Save Journal
+                    @(!saveStatus ? "Save Journal" : "Saving Journal") 
                 </button>
             </div>
         </div>
@@ -61,6 +61,8 @@
     private List<ConversationMessage> _messages = new();
     private DateTime _selectedDate;
     private ElementReference _saveMessage;
+    private bool requestStatus = false;
+    private bool saveStatus = false;
     [Inject] private IJSRuntime JS { get; set; } = default!;
 
 
@@ -159,11 +161,17 @@
 
     protected async Task SaveJournal()
     {
+        if (string.IsNullOrEmpty( _journalTitle) && string.IsNullOrEmpty( _journalContent)) return;
+        
+        saveStatus = true;
         await ShowSavingMessage("Saving...");
+
         JournalEntry entry = await JournalService.SaveOrUpdateAndSummarizeAsync(_userId!, _journalTitle,
         _journalContent, _selectedDate);
+
         await ShowSavingMessage("Saved!", 2000);
         await JournalService.CreateConversation(_userId!, entry.Id);
+        saveStatus = false;
 
         if (_journalId != entry.Id || JournalStateService.JournalId != entry.Id)
         {
