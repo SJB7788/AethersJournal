@@ -82,6 +82,12 @@
     {
         if (_userId == null) return;
 
+        _journalContent = String.Empty;
+        _journalTitle = String.Empty;
+        _journalSummary = String.Empty;
+        _journalId = 0;
+        _messages.Clear();
+
         _selectedDate = GetQueryDate();
 
         if (QueryDate != null &&
@@ -114,14 +120,6 @@
                 Console.WriteLine("Messages has been cleared " + _messages.Count());
             }
         }
-        else
-        {
-            _journalContent = String.Empty;
-            _journalTitle = String.Empty;
-            _journalSummary = String.Empty;
-            _journalId = 0;
-            _messages.Clear();
-        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -153,7 +151,7 @@
         if (!requestStatus && !returnIfClickCooldown()) return;
 
         requestStatus = true;
-        
+
         _selectedDate = _selectedDate.AddDays(-1);
         string formattedDate = _selectedDate.ToString("yyy-MM-dd");
 
@@ -178,7 +176,8 @@
         lastClickTime = DateTime.UtcNow;
     }
 
-    protected bool returnIfClickCooldown() {
+    protected bool returnIfClickCooldown()
+    {
         return DateTime.UtcNow - lastClickTime > cooldown;
     }
 
