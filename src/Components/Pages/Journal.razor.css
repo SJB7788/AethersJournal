@@ -75,6 +75,7 @@
 .navigation {
   cursor: pointer;
   text-decoration: none;
+  user-select: none;  
   color: var(--title-fainted-color);
   font-family: var(--desc-font-family);
   font-size: 1.2em;
