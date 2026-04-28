@@ -1,5 +1,7 @@
 # AethersJournal
 
+Link: https://aethersjournal.ca/
+
 AethersJournal is a web-based journaling application built with **.NET** and **Blazor** that integrates **AI-assisted reflection** features. 
 The application is designed to help users write journal entries and receive structured, supportive feedback intended to encourage reflection and emotional awareness.
 
@@ -93,10 +95,8 @@ AethersJournal/
 
 ## Current Status
 
-This project is under active development.
-
-Core journaling functionality, initial AI integration and user authentication are implemented. 
-Calendar and analytics features are in progress.
+This project complete and you can try out the website here!
+https://aethersjournal.ca/
 
 ## Limitations
 - This application is not a medical or diagnostic tool
