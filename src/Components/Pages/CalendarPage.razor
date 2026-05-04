@@ -146,6 +146,13 @@
         }
 
         _calendar.GenerateCalendarCells();
+
+        var _entryLookup = JournalService.GetMonthEntryInfoForUser(_userId!, _calendar.GetCalendarStartDate());
+
+        if (_entryLookup != null)
+        {
+            _existingJournalEntries = _entryLookup.ToLookup(e => e.Date.Date).ToDictionary(g => g.Key, g => g.First());
+        }
     }
 
     void DirectToJournal(CalendarCell? cell)
