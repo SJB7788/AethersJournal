@@ -50,6 +50,7 @@
     {
         AITherapist.ClearContentHistory();
         AITherapist.AddOrEditJournalSummary(Summary);
+
         foreach (var message in Messages)
         {
             AITherapist.AddToContentHistory(message.Content, message.Role == ChatProfile.User ? GeminiAPIRole.user :
@@ -70,6 +71,13 @@
 
         // if message is already sending, return to avoid duplicate sends
         if (messageIsSending) return;
+
+        if (String.IsNullOrEmpty(Summary)) {
+            await AddChatBubble(this.Message, isUser: true);
+            await AddChatBubble("Please create a journal entry first!", isUser: false);
+            this.Message = "";
+            return;
+        }
 
         string messageCopy = this.Message;
         messageIsSending = true;
