@@ -91,6 +91,7 @@
                 Message = messageCopy,
                 Profile = ChatProfile.User
             });
+            
             AITherapist.AddToContentHistory(messageCopy, GeminiAPIRole.user);
             await AddChatBubble(messageCopy, isUser: true);
 

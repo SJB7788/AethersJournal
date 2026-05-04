@@ -187,9 +187,13 @@
 
         saveStatus = true;
         await ShowSavingMessage("Saving...");
+        Console.WriteLine("\n\nContent: " + _journalContent);
 
         JournalEntry entry = await JournalService.SaveOrUpdateAndSummarizeAsync(_userId!, _journalTitle,
         _journalContent, _selectedDate);
+        
+        _journalSummary = entry.Summary;
+        _journalId = entry.Id;
 
         await ShowSavingMessage("Saved!", 2000);
         await JournalService.CreateConversation(_userId!, entry.Id);
@@ -203,6 +207,8 @@
 
     protected async Task HandleChatSave(SendMessageEventArgs messageArgs)
     {
+        Console.WriteLine("\n\nMessage sent\n\n");
+        Console.WriteLine("\n\nJournalID: " + _journalId + "\n\n");
         await JournalService.AddConversationMessage(_journalId, messageArgs.Message, messageArgs.Profile);
     }
 
