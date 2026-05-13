@@ -3,12 +3,11 @@ using Microsoft.EntityFrameworkCore;
 
 public class JournalService
 {
-    private JournalContext _context;
     private FreeAITherapist _aITherapist;
-
-    public JournalService(JournalContext context, FreeAITherapist aITherapist)
+    private readonly IDbContextFactory<JournalContext> _contextFactory;
+    public JournalService(IDbContextFactory<JournalContext> contextFactory, FreeAITherapist aITherapist)
     {
-        _context = context;
+        _contextFactory = contextFactory;
         _aITherapist = aITherapist;
     }
 
@@ -19,6 +18,7 @@ public class JournalService
     /// <returns>The journal entry for the current day for the user, or null if no entry exists</returns>
     public async Task<JournalEntry?> GetTodaysEntryForUser(string userId)
     {
+        using var _context = _contextFactory.CreateDbContext();
         DateTime today = DateTime.UtcNow.Date;
         return await _context.JournalEntries.FirstOrDefaultAsync(journal =>
             journal.UserId == userId &&
@@ -33,6 +33,7 @@ public class JournalService
     /// <returns>The journal entry for the specified date for the user, or null if no entry exists</returns>
     public async Task<JournalEntry?> GetEntryForUser(string userId, DateTime? date)
     {
+        using var _context = _contextFactory.CreateDbContext();
         return await _context.JournalEntries.FirstOrDefaultAsync(journal =>
             journal.UserId == userId &&
             journal.Date == date
@@ -41,6 +42,7 @@ public class JournalService
 
     public List<JournalEntry>? GetMonthEntryInfoForUser(string userId, DateTime date)
     {
+        using var _context = _contextFactory.CreateDbContext();
         return _context.JournalEntries.Where(journal =>
             journal.UserId == userId && journal.Date.Month == date.Month
         ).ToList();
@@ -54,6 +56,7 @@ public class JournalService
     /// <param name="dateTime">The date and time of the journal entry</param>
     public async Task<(JournalEntry entry, string? originalContent)> SaveOrUpdateJournal(string userId, string journalTitle, string journalEntry, DateTime dateTime)
     {
+        using var _context = _contextFactory.CreateDbContext();
         JournalEntry? entry = await _context.JournalEntries.FirstOrDefaultAsync(j => j.UserId.Equals(userId) && j.Date.Date == dateTime);
 
         string? originalContent = null;
@@ -120,6 +123,7 @@ public class JournalService
             Console.WriteLine("Info: Failed to create summary");
             return;
         }
+        using var _context = _contextFactory.CreateDbContext();
 
         entry.Summary = summary;
         await _context.SaveChangesAsync();
@@ -136,7 +140,9 @@ public class JournalService
         return journal;
     }
 
-    public async Task<bool> ConversationExists(string userId, int journalId) {
+    public async Task<bool> ConversationExists(string userId, int journalId)
+    {
+        using var _context = _contextFactory.CreateDbContext();
         var journalExists = await _context.Conversations.FirstOrDefaultAsync(c => c.UserId.Equals(userId) && c.JournalId == journalId);
 
         return !(journalExists == null);
@@ -145,7 +151,8 @@ public class JournalService
     // create conversation and return conversation id
     public async Task<int> CreateConversation(string userId, int journalId)
     {
-        if (await ConversationExists(userId, journalId)) {
+        if (await ConversationExists(userId, journalId))
+        {
             return -1;
         }
 
@@ -156,6 +163,7 @@ public class JournalService
             StartedAt = DateTime.UtcNow
         };
 
+        using var _context = _contextFactory.CreateDbContext();
         _context.Conversations.Add(conversation);
 
         await _context.SaveChangesAsync();
@@ -166,6 +174,7 @@ public class JournalService
     // create ConversationMessage
     public async Task AddConversationMessage(int journalId, string content, ChatProfile role)
     {
+        using var _context = _contextFactory.CreateDbContext();
         var entry = await _context.Conversations.FirstOrDefaultAsync(c => c.JournalId == journalId);
 
         if (entry == null)
@@ -190,6 +199,7 @@ public class JournalService
 
     public async Task<List<ConversationMessage>?> GetAllConversationMessage(int journalId)
     {
+        using var _context = _contextFactory.CreateDbContext();
         var entry = await _context.Conversations.FirstOrDefaultAsync(c => c.JournalId == journalId);
 
         if (entry == null)
@@ -204,6 +214,7 @@ public class JournalService
     // get journalID based on UserID and Date
     public async Task<JournalEntry?> GetJournalEntryFromUserIdAndDate(int userId, DateTime date)
     {
+        using var _context = _contextFactory.CreateDbContext();
         JournalEntry? entry = await _context.JournalEntries.FirstOrDefaultAsync(j => j.UserId.Equals(userId) && j.Date == date);
         return entry;
     }

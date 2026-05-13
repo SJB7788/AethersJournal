@@ -43,7 +43,7 @@ builder.Services.Configure<AITherapistConfig>(options =>
     options.ApiKey = apiKey;
 });
 
-builder.Services.AddDbContext<JournalContext>(options =>
+builder.Services.AddDbContextFactory<JournalContext>(options =>
     options.UseNpgsql(connectionString), ServiceLifetime.Scoped);
 
 builder.Services.AddIdentity<User, IdentityRole>()
