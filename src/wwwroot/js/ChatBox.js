@@ -23,7 +23,9 @@ window.ChatBox = {
   },
 
   clearMessage: function (chatboxDiv) {
-    chatboxDiv.innerHTML = "";
+    while (chatboxDiv.children.length > 1) {
+      chatboxDiv.removeChild(chatboxDiv.lastChild);
+    }
   },
 
   scrollToBottom: function (element) {

@@ -55,7 +55,6 @@
     private async Task HandleContentInput(ChangeEventArgs e)
     {
         Content = e.Value?.ToString() ?? string.Empty;
-
         await ContentChanged.InvokeAsync(Content);
     }
 
