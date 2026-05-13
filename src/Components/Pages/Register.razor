@@ -16,20 +16,20 @@
 
             <div class="register__email-group register__inner-input-group">
                 <label for="email-input" class="register__label">Email</label>
-                <input @bind-value="registerModel.Email" type="text" id="email-input"
+                <input @bind="registerModel.Email" @bind:event="oninput" type="text" id="email-input"
                     class="register__input register__input--email">
             </div>
 
             <div class="register__password-group register__inner-input-group">
                 <label for="password-input" class="register__label">Password</label>
-                <input @bind-value="registerModel.Password" type="password" id="password-input"
+                <input @bind="registerModel.Password" @bind:event="oninput" type="password" id="password-input"
                     class="register__input register__input--password">
 
 
             </div>
             <div class="register__reenter-password-group register__inner-input-group">
                 <label for="password-reenter-input" class="register__label">Re-enter password</label>
-                <input @bind-value="registerModel.ConfirmPassword" type="password" id="password-reenter-input"
+                <input @bind="registerModel.ConfirmPassword" @bind:event="oninput" type="password" id="password-reenter-input"
                     class="register__input register__input--reenter-password">
             </div>
         </div>

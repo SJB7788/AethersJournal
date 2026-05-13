@@ -12,7 +12,7 @@
         <div class="login__input-group">
             <div class="login__email-group">
                 <label for="email-input" class="login__label">Email</label>
-                <input @bind="_email" type="email" id="email-input" class="login__input login__input--email" />
+                <input @bind="_email" @bind:event="oninput" type="email" id="email-input" class="login__input login__input--email" />
             </div>
 
             <div class="login__password-group">
@@ -20,7 +20,7 @@
                     <label for="password-input" class="login__label">Password</label>
                     <p class="login__forgot-link">Forgot password?</p>
                 </div>
-                <input @bind="_password" type="password" id="password-input"
+                <input @bind="_password" @bind:event="oninput" type="password" id="password-input"
                        class="login__input login__input--password" />
             </div>
         </div>
