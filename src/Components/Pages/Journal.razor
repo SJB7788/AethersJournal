@@ -1,4 +1,5 @@
-﻿@attribute [Authorize]
+﻿@implements IDisposable
+@attribute [Authorize]
 @page "/journal"
 @using Microsoft.AspNetCore.Http.HttpResults
 
@@ -70,56 +71,82 @@
 
     [Inject] private IJSRuntime JS { get; set; } = default!;
 
-
+    private CancellationTokenSource _cts = new();
     protected override async Task OnInitializedAsync()
     {
         AuthenticationState? authState = await AuthState;
         _user = authState.User;
         _userId = _user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        NavManager.LocationChanged += OnLocationChanged;
+        await LoadJournalData();
     }
 
-    protected override async Task OnParametersSetAsync()
+    private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        if (_userId == null) return;
+        var uri = new Uri(e.Location);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+        QueryDate = query.TryGetValue("date", out var date) ? date.ToString() : null;
 
-        _journalContent = String.Empty;
-        _journalTitle = String.Empty;
-        _journalSummary = String.Empty;
-        _journalId = 0;
-        _messages.Clear();
+        await LoadJournalData();
+        await InvokeAsync(StateHasChanged);
+    }
 
-        _selectedDate = GetQueryDate();
+    private async Task LoadJournalData()
+    {
+        _cts.Cancel();
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
 
-        if (QueryDate != null &&
-        DateTime.TryParse(QueryDate, out DateTime parsedDate) &&
-        parsedDate.Date > DateTime.UtcNow.Date)
+        try
         {
-            NavManager.NavigateTo("/journal", false);
-            return;
+            if (_userId == null) return;
+
+            _journalContent = String.Empty;
+            _journalTitle = String.Empty;
+            _journalSummary = String.Empty;
+            _journalId = 0;
+            _messages.Clear();
+
+            _selectedDate = GetQueryDate();
+
+            if (QueryDate != null &&
+            DateTime.TryParse(QueryDate, out DateTime parsedDate) &&
+            parsedDate.Date > DateTime.UtcNow.Date)
+            {
+                NavManager.NavigateTo("/journal", false);
+                return;
+            }
+
+            JournalEntry? entry = await JournalService.GetEntryForUser(_userId, _selectedDate);
+            if (token.IsCancellationRequested) return;
+
+            if (entry != null)
+            {
+                _journalContent = entry.Content;
+                _journalTitle = entry.Title;
+                _journalSummary = entry.Summary;
+                _journalId = entry.Id;
+
+                var conversationMessages = await JournalService.GetAllConversationMessage(_journalId);
+                if (token.IsCancellationRequested) return;
+
+                if (conversationMessages != null && conversationMessages.Count > 0)
+                {
+                    _messages = conversationMessages;
+                }
+                else
+                {
+                    _messages.Clear();
+                    Console.WriteLine("Messages has been cleared " + _messages.Count());
+                }
+            }
         }
-
-        JournalEntry? entry = await JournalService.GetEntryForUser(_userId, _selectedDate);
-        Console.WriteLine("userid: " + _selectedDate);
-
-        if (entry != null)
+        catch (OperationCanceledException)
         {
-            _journalContent = entry.Content;
-            _journalTitle = entry.Title;
-            _journalSummary = entry.Summary;
-            _journalId = entry.Id;
-
-            var conversationMessages = await JournalService.GetAllConversationMessage(_journalId);
-
-            if (conversationMessages != null && conversationMessages.Count > 0)
-            {
-                _messages = conversationMessages;
-            }
-            else
-            {
-                _messages.Clear();
-                Console.WriteLine("Messages has been cleared " + _messages.Count());
-            }
+            // expected, ignore
         }
+        
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -215,5 +242,10 @@
     protected async Task ShowSavingMessage(string message, int duration = 1000)
     {
         await JS.InvokeVoidAsync("Journal.showSaveMessage", _saveMessage, message, duration);
+    }
+    public void Dispose()
+    {
+        NavManager.LocationChanged -= OnLocationChanged;
+        _cts.Dispose();
     }
 }
